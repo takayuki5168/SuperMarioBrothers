@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include "include/math_util.hpp"
 
 class AbstObject
 {
@@ -10,18 +11,24 @@ public:
         Point(int x, int y)
             : x(x), y(y) {}
         Point(double x, double y)
-            : x(static_cast<int>(x)), y(static_cast<int>(y)) {}
+            : x(x), y(y) {}
         Point(int x, double y)
-            : x(x), y(static_cast<int>(y)) {}
+            : x(x), y(y) {}
         Point(double x, int y)
-            : x(static_cast<int>(x)), y(y) {}
+            : x(x), y(y) {}
+        Point operator+(Point other) { return Point{x + other.x, y + other.y}; }
+        void setInRange(double max)
+        {
+            x = MathUtil::setInRange(x, max);
+            y = MathUtil::setInRange(y, max);
+        }
 
-        int x = 0;
-        int y = 0;
+        double x = 0;
+        double y = 0;
     };
     struct Line {
         Line() = default;
-        Line(int x1, int y1, int x2, int y2)
+        Line(double x1, double y1, double x2, double y2)
             : start_point(Point{x1, y1}), end_point(Point{x2, y2}) {}
         Point start_point = Point{0, 0};
         Point end_point = Point{0, 0};
@@ -38,21 +45,21 @@ public:
           m_name(name), m_color(color)
     {
         std::array<Point, 3> top_point = std::array<Point, 3>{
-            Point{x + w / 6.0, y},
-            Point{x + w / 2.0, y},
-            Point{x + w * 5.0 / 6, y}};
+            Point{w / 6.0, 0},
+            Point{w / 2.0, 0},
+            Point{w * 5.0 / 6, 0}};
         std::array<Point, 3> right_point = std::array<Point, 3>{
-            Point{x + w, y + h / 6.0},
-            Point{x + w, y + h / 2.0},
-            Point{x + w, y + h * 5.0 / 6}};
+            Point{w, h / 6.0},
+            Point{w, h / 2.0},
+            Point{w, h * 5.0 / 6}};
         std::array<Point, 3> bottom_point = std::array<Point, 3>{
-            Point{x + w / 6.0, y + h},
-            Point{x + w / 2.0, y + h},
-            Point{x + w * 5.0 / 6, y + h}};
+            Point{w / 6.0, h},
+            Point{w / 2.0, h},
+            Point{w * 5.0 / 6, h}};
         std::array<Point, 3> left_point = std::array<Point, 3>{
-            Point{x, y + h / 6.0},
-            Point{x, y + h / 2.0},
-            Point{x, y + h * 5.0 / 6}};
+            Point{0, h / 6.0},
+            Point{0, h / 2.0},
+            Point{0, h * 5.0 / 6}};
 
         m_collision_point = std::move(std::array<std::array<Point, 3>, 4>{
             std::move(top_point),
@@ -61,21 +68,67 @@ public:
             std::move(left_point)});
     }
 
-    void draw(SDL_Surface* m_window)
+    virtual void updatePos()
     {
-        m_rect.x = m_pos.x;
-        m_rect.y = m_pos.y;
+        m_vel.y += m_gravity;
+        m_vel.setInRange(m_max_vel);
+        m_pos = m_pos + m_vel;
+    }
+
+    void setPos(Point pos) { m_pos = pos; }
+    void setPosX(double x) { m_pos.x = x; }
+    void setPosY(double y) { m_pos.y = y; }
+
+    Point getVel() { return m_vel; }
+
+    void setVel(double vel_x, double vel_y) { m_vel = Point{vel_x, vel_y}; }
+    void setVelX(double vel_x) { m_vel.x = vel_x; }
+    void setVelXPlus() { m_vel.x = MathUtil::setPlus(m_vel.x); }
+    void setVelXMinus() { m_vel.x = MathUtil::setMinus(m_vel.x); }
+    void setVelY(double vel_y) { m_vel.y = vel_y; }
+    void setVelYPlus() { m_vel.y = MathUtil::setPlus(m_vel.y); }
+    void setVelYMinus() { m_vel.y = MathUtil::setMinus(m_vel.y); }
+
+    void updateVel(double vel_x, double vel_y, double max_vel = m_max_vel)
+    {
+        m_vel = m_vel + Point{vel_x, vel_y};
+        m_vel.setInRange(max_vel);
+    }
+    void updateVelX(double vel_x, double max_vel = m_max_vel) { m_vel.x = MathUtil::setInRange(m_vel.x + vel_x, max_vel); }
+    void updateVelY(double vel_y, double max_vel = m_max_vel) { m_vel.y = MathUtil::setInRange(m_vel.y + vel_y, max_vel); }
+
+
+    virtual void draw(SDL_Surface* m_window)
+    {
+        m_rect.x = static_cast<int>(m_pos.x);
+        m_rect.y = static_cast<int>(m_pos.y);
         SDL_FillRect(m_window, &m_rect, m_color);
     }
 
-    virtual void updatePos() = 0;
+    virtual void updateCollision() {}
+
+    std::array<Point, 3> getCollisionPoint(int i)
+    {
+        return std::array<Point, 3>{
+            m_collision_point.at(i).at(0) + Point{m_pos.x, m_pos.y},
+            m_collision_point.at(i).at(1) + Point{m_pos.x, m_pos.y},
+            m_collision_point.at(i).at(2) + Point{m_pos.x, m_pos.y}};
+    }
+
+    double getWidth() { return m_rect.w; }
+    double getHeight() { return m_rect.h; }
+
+    void setGravity(double g) { m_gravity = g; }
+    double getGravity() { return m_gravity; }
 
 protected:
     std::array<std::array<Point, 3>, 4> m_collision_point;
 
     Point m_pos;
-    Point m_acc;
     Point m_vel;
+
+    double m_gravity = 0;
+    constexpr static double m_max_vel = 5;
 
 private:
     SDL_Rect m_rect;

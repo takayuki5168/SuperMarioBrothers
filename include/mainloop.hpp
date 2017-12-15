@@ -38,12 +38,13 @@ private:
     SDL_Event m_event;
 
     bool m_exit_flag = false;
+    int m_input_type = 0;
 
     std::unique_ptr<FixBlockManager> m_fix_block_manager = nullptr;
     //std::unique_ptr<UniqueBlockManager> m_unique_block_manager = nullptr;
     std::unique_ptr<PlayerManager> m_player_manager = nullptr;
     //std::unique_ptr<EnemyManager>m_enemy_manager= nullptr;
-    std::unique_ptr<EventManager> m_event_manager = std::make_unique<EventManager>(m_event);
+    std::unique_ptr<EventManager> m_event_manager = nullptr;  //std::make_unique<EventManager>(m_event);
 };
 
 inline MainLoop& mainLoop() { return MainLoop::instance(); }

@@ -15,8 +15,10 @@ MainLoop::MainLoop()
     }
 
     {
-        m_fix_block_manager = std::make_unique<FixBlockManager>();
+        m_fix_block_manager = std::make_unique<FixBlockManager>("../data/back_fix_block.txt");
     }
+
+    m_event_manager = std::make_unique<EventManager>(m_event, m_input_type);
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_SetVideoMode(Params::WINDOW_WIDTH, Params::WINDOW_HEIGHT, Params::BPP, SDL_HWSURFACE);
@@ -27,7 +29,7 @@ void MainLoop::execute()
     while (not m_exit_flag) {
         auto start_time = std::chrono::system_clock::now();
 
-        m_event_manager->execute();  //!< イベントの処理
+        m_event_manager->execute(m_player_manager);  //!< イベントの処理
 
         updatePos();        //!< 位置の更新
         updateCollision();  //!< 当たり判定
@@ -48,6 +50,7 @@ void MainLoop::updatePos()
 
 void MainLoop::updateCollision()
 {
+    m_player_manager->updateCollision(m_fix_block_manager);
 }
 
 void MainLoop::draw()
