@@ -105,8 +105,8 @@ public:
     {
         m_rect.x = static_cast<int>(m_pos.x + m_window_x);
         m_rect.y = static_cast<int>(m_pos.y);
-        m_rect.w = m_w; // TODO バグ
-        m_rect.h = m_h; // TODO バグ
+        m_rect.w = m_w;  // TODO バグ
+        m_rect.h = m_h;  // TODO バグ
         SDL_FillRect(m_window, &m_rect, m_color);
     }
 

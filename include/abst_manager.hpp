@@ -32,6 +32,7 @@ public:
     void updateVelX(int i, double vel_x, double max_vel) { m_data.at(i)->updateVelX(vel_x, max_vel); }
     void updateVelY(int i, double vel_y, double max_vel) { m_data.at(i)->updateVelY(vel_y, max_vel); }
 
+    /*
     void updateVelXAll(double vel_x, double max_vel)
     {
         for (int i = 0; i < m_data.size(); i++) {
@@ -39,10 +40,18 @@ public:
         }
     }
 
-    virtual void draw(SDL_Surface* m_window)
+    void showVelXAll()
     {
         for (int i = 0; i < m_data.size(); i++) {
-            m_data.at(i)->draw(m_window);
+            std::cout << m_data.at(i)->getVel().x << std::endl;
+        }
+    }
+  */
+
+    virtual void draw(SDL_Surface* window, double window_x)
+    {
+        for (int i = 0; i < m_data.size(); i++) {
+            m_data.at(i)->draw(window, window_x);
         }
     }
 

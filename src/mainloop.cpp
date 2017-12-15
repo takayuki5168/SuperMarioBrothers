@@ -29,7 +29,7 @@ void MainLoop::execute()
     while (not m_exit_flag) {
         auto start_time = std::chrono::system_clock::now();
 
-        m_event_manager->execute(m_player_manager, m_window_vel_x, m_which_x);  //!< イベントの処理
+        m_event_manager->execute(m_player_manager);  //!< イベントの処理
 
         updatePos();        //!< 位置の更新
         updateCollision();  //!< 当たり判定
@@ -43,12 +43,9 @@ void MainLoop::execute()
 
 void MainLoop::updatePos()
 {
-    //m_player_manager->updatePos();
-
-    if (m_which_x == 1) {
-        m_fix_object_manager->updateVelXAll(m_window_vel_x, 100);
-    }
+    m_player_manager->updatePos();
     m_fix_object_manager->updatePos();
+    //m_fix_object_manager->showVelXAll();
 }
 
 void MainLoop::updateCollision()
@@ -57,15 +54,26 @@ void MainLoop::updateCollision()
 }
 
 void MainLoop::draw()
-{
+{ /*
+    std::cout << m_fix_object_manager->getData().at(2)->getRect().x << " "
+              << m_fix_object_manager->getData().at(2)->getRect().y << " "
+              << m_fix_object_manager->getData().at(2)->getRect().w << " "
+              << m_fix_object_manager->getData().at(2)->getRect().h << std::endl;
+ */
     m_window = SDL_GetVideoSurface();
     SDL_FillRect(m_window, &m_window_rect, SDL_MapRGB(m_window->format, 0, 0, 0));
 
+    // 基準点の変更
+    m_window_x = 300 - m_player_manager->getData().at(0)->getPos().x;
+
     // 描画
-    m_player_manager->draw(m_window);
-    m_fix_object_manager->draw(m_window);
+    m_player_manager->draw(m_window, m_window_x);
+    m_fix_object_manager->draw(m_window, m_window_x);
+
+
+    SDL_FillRect(m_window, &rect, 0x00ff00);
 
     // 更新
     SDL_UpdateRect(m_window, 0, 0, 0, 0);
-    //SDL_Flip(m_window);
+    SDL_Flip(m_window);
 }
