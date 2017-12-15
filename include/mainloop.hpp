@@ -8,6 +8,9 @@
 #include <SDL/SDL_mixer.h>
 #include "include/event_manager.hpp"
 #include "include/mario.hpp"
+#include "include/abst_fix_block.hpp"
+#include "include/fix_block_manager.hpp"
+#include "include/player_manager.hpp"
 
 class MainLoop
 {
@@ -20,7 +23,7 @@ public:
 
     void execute();
     void updatePos();
-    void judgeCollision();
+    void updateCollision();
     void draw();
 
 private:
@@ -33,15 +36,14 @@ private:
     SDL_Surface* m_window;
     SDL_Rect m_window_rect;
     SDL_Event m_event;
-    std::shared_ptr<EventManager> m_event_manager = std::make_unique<EventManager>(m_event);
 
     bool m_exit_flag = false;
 
-    const int BPP = 32;
-    const int WINDOW_WIDTH = 640;
-    const int WINDOW_HEIGHT = 480;
-
-    std::shared_ptr<Mario> mario = nullptr;
+    std::unique_ptr<FixBlockManager> m_fix_block_manager = nullptr;
+    //std::unique_ptr<UniqueBlockManager> m_unique_block_manager = nullptr;
+    std::unique_ptr<PlayerManager> m_player_manager = nullptr;
+    //std::unique_ptr<EnemyManager>m_enemy_manager= nullptr;
+    std::unique_ptr<EventManager> m_event_manager = std::make_unique<EventManager>(m_event);
 };
 
 inline MainLoop& mainLoop() { return MainLoop::instance(); }

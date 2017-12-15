@@ -1,14 +1,25 @@
 #include <iostream>
 #include <chrono>
 #include "include/mainloop.hpp"
+#include "include/params.hpp"
 
 MainLoop::MainLoop()
 {
-    m_window_rect = SDL_Rect{0, 0, static_cast<uint16_t>(WINDOW_WIDTH), static_cast<uint16_t>(WINDOW_HEIGHT)};
-    mario = std::make_shared<Mario>();
+    m_window_rect = SDL_Rect{0, 0, static_cast<uint16_t>(Params::WINDOW_WIDTH), static_cast<uint16_t>(Params::WINDOW_HEIGHT)};
+
+    {
+        m_player_manager = std::make_unique<PlayerManager>();
+
+        auto mario = std::make_unique<Mario>();
+        m_player_manager->add(std::move(mario));
+    }
+
+    {
+        m_fix_block_manager = std::make_unique<FixBlockManager>();
+    }
 
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_SetVideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, BPP, SDL_HWSURFACE);
+    SDL_SetVideoMode(Params::WINDOW_WIDTH, Params::WINDOW_HEIGHT, Params::BPP, SDL_HWSURFACE);
 }
 
 void MainLoop::execute()
@@ -18,9 +29,9 @@ void MainLoop::execute()
 
         m_event_manager->execute();  //!< イベントの処理
 
-        updatePos();       //!< 位置の更新
-        judgeCollision();  //!< 当たり判定
-        draw();            //!< 描画
+        updatePos();        //!< 位置の更新
+        updateCollision();  //!< 当たり判定
+        draw();             //!< 描画
 
         auto end_time = std::chrono::system_clock::now();
         auto diff_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
@@ -30,10 +41,12 @@ void MainLoop::execute()
 
 void MainLoop::updatePos()
 {
-    mario->updatePos();
+    m_player_manager->updatePos();
+    m_fix_block_manager->updatePos();
+    //m_unique
 }
 
-void MainLoop::judgeCollision()
+void MainLoop::updateCollision()
 {
 }
 
@@ -43,7 +56,8 @@ void MainLoop::draw()
     SDL_FillRect(m_window, &m_window_rect, SDL_MapRGB(m_window->format, 0, 0, 0));
 
     // 描画
-    mario->draw(m_window);
+    m_player_manager->draw(m_window);
+    m_fix_block_manager->draw(m_window);
 
     // 更新
     SDL_UpdateRect(m_window, 0, 0, 0, 0);
