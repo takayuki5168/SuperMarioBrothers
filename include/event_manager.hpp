@@ -13,10 +13,11 @@ public:
 
     void execute(std::unique_ptr<PlayerManager>& player_manager)
     {
+        int player = 0;
         if (m_input_type == 0) {
             if (SDL_PollEvent(&m_event)) {
                 if (m_event.type == SDL_KEYDOWN) {
-                    if (m_event.key.keysym.sym == SDLK_UP and player_manager->getData().at(0)->getGravity() == 0) {
+                    if (m_event.key.keysym.sym == SDLK_UP and player_manager->getData().at(player)->getGravity() == 0) {
                         top_key = true;
                     } else if (m_event.key.keysym.sym == SDLK_DOWN) {
                         bottom_key = true;
@@ -39,16 +40,28 @@ public:
             }
 
 
-            if (top_key) {
-                player_manager->updateVelY(0, -3);
+            if (top_key and top_cnt > 0) {
+                player_manager->updateVelY(player, -0.5);
+                top_cnt--;
+            } else {
+                top_key = false;
+                top_cnt = 12;
             }
             if (right_key) {
-                player_manager->updateVelX(0, 0.2, 3);
+                if (player_manager->getData().at(player)->getGravity() == 0) {
+                    player_manager->updateVelX(player, 0.2, 3);
+                } else {
+                    player_manager->updateVelX(player, 0.05, 2);
+                }
             }
             if (bottom_key) {
             }
             if (left_key) {
-                player_manager->updateVelX(0, -0.2, 3);
+                if (player_manager->getData().at(player)->getGravity() == 0) {
+                    player_manager->updateVelX(player, -0.2, 3);
+                } else {
+                    player_manager->updateVelX(player, -0.05, 2);
+                }
             }
         }
     }
@@ -61,4 +74,5 @@ private:
     bool right_key = 0;
     bool bottom_key = 0;
     bool left_key = 0;
+    int top_cnt = 0;
 };
