@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 #include "include/abst_object.hpp"
-#include "include/abst_fix_block.hpp"
 
 class AbstManager
 {
