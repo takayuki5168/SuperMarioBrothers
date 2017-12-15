@@ -13,5 +13,4 @@ public:
     }
 
 private:
-    double hit_point = 0;
 };

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "include/abst_fix_block.hpp"
+#include "include/abst_fix_object.hpp"
 
-class BrickBlock : public AbstFixBlock
+class BrickBlock : public AbstFixObject
 {
 public:
     BrickBlock(int x, int y)
-        : AbstFixBlock(x, y, 0x8d3800, "BrickBlock") {}
+        : AbstFixObject(x, y, 0x8d3800, "BrickBlock") {}
 private:
 };

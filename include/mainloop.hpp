@@ -8,8 +8,8 @@
 #include <SDL/SDL_mixer.h>
 #include "include/event_manager.hpp"
 #include "include/mario.hpp"
-#include "include/abst_fix_block.hpp"
-#include "include/fix_block_manager.hpp"
+#include "include/abst_fix_object.hpp"
+#include "include/fix_object_manager.hpp"
 #include "include/player_manager.hpp"
 
 class MainLoop
@@ -37,10 +37,13 @@ private:
     SDL_Rect m_window_rect;
     SDL_Event m_event;
 
+    int m_which_x = 1;  // !< マリオが動くか画面が動くか
+    double m_window_vel_x = 0;
+
     bool m_exit_flag = false;
     int m_input_type = 0;
 
-    std::unique_ptr<FixBlockManager> m_fix_block_manager = nullptr;
+    std::unique_ptr<FixObjectManager> m_fix_object_manager = nullptr;
     //std::unique_ptr<UniqueBlockManager> m_unique_block_manager = nullptr;
     std::unique_ptr<PlayerManager> m_player_manager = nullptr;
     //std::unique_ptr<EnemyManager>m_enemy_manager= nullptr;

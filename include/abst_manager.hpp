@@ -33,6 +33,13 @@ public:
     void updateVelX(int i, double vel_x, double max_vel) { m_data.at(i)->updateVelX(vel_x, max_vel); }
     void updateVelY(int i, double vel_y, double max_vel) { m_data.at(i)->updateVelY(vel_y, max_vel); }
 
+    void updateVelXAll(double vel_x, double max_vel)
+    {
+        for (int i = 0; i < m_data.size(); i++) {
+            m_data.at(i)->updateVelX(vel_x, max_vel);
+        }
+    }
+
     virtual void draw(SDL_Surface* m_window)
     {
         for (int i = 0; i < m_data.size(); i++) {

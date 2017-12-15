@@ -1,8 +1,9 @@
+/*
 #pragma once
 
 #include "include/abst_fix_object.hpp"
 
-class AbstFixBlock : public AbstFixObject
+bclass AbstFixBlock : public AbstFixObject
 {
 public:
     AbstFixBlock(int x, int y, int color, std::string name)
@@ -13,3 +14,4 @@ public:
 private:
     static const int m_block_size = AbstFixObject::getObjectSize();
 };
+*/

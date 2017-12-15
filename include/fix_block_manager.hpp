@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <vector>
 #include "include/abst_fix_object_manager.hpp"
@@ -26,7 +26,8 @@ public:
         }
     }
 
-    std::vector<std::vector<int>> getBlockMap() { return m_object_map; }	  
+    std::vector<std::vector<int>> getBlockMap() { return m_object_map; }
 
 private:
 };
+*/

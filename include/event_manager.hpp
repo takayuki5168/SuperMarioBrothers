@@ -11,9 +11,11 @@ public:
     EventManager(SDL_Event event, int input_type)
         : m_event(event), m_input_type(input_type) {}
 
-    void execute(std::unique_ptr<PlayerManager>& player_manager)
+    void execute(std::unique_ptr<PlayerManager>& player_manager, double& window_vel_x, int which_x)
     {
         int player = 0;
+
+
         if (m_input_type == 0) {
             if (SDL_PollEvent(&m_event)) {
                 if (m_event.type == SDL_KEYDOWN) {
@@ -49,23 +51,40 @@ public:
             }
             if (right_key) {
                 if (player_manager->getData().at(player)->getGravity() == 0) {
-                    player_manager->updateVelX(player, 0.2, 3);
+                    if (which_x == 0) {
+                        player_manager->updateVelX(player, 0.2, 3);
+                    } else if (which_x == 1) {
+                        updateVelX(window_vel_x, -0.2, 3);
+                    }
                 } else {
-                    player_manager->updateVelX(player, 0.05, 2);
+                    if (which_x == 0) {
+                        player_manager->updateVelX(player, 0.05, 2);
+                    } else if (which_x == 1) {
+                        updateVelX(window_vel_x, -0.05, 3);
+                    }
                 }
             }
             if (bottom_key) {
             }
             if (left_key) {
                 if (player_manager->getData().at(player)->getGravity() == 0) {
-                    player_manager->updateVelX(player, -0.2, 3);
+                    if (which_x == 0) {
+                        player_manager->updateVelX(player, -0.2, 3);
+                    } else if (which_x == 1) {
+                        updateVelX(window_vel_x, 0.2, 3);
+                    }
                 } else {
-                    player_manager->updateVelX(player, -0.05, 2);
+                    if (which_x == 0) {
+                        player_manager->updateVelX(player, -0.05, 2);
+                    } else if (which_x == 1) {
+                        updateVelX(window_vel_x, 0.05, 3);
+                    }
                 }
             }
         }
     }
 
+    void updateVelX(double& vel_x, double diff_vel_x, double max_vel = m_max_vel) { vel_x = MathUtil::setInRange(vel_x + diff_vel_x, max_vel); }
 
 private:
     SDL_Event m_event;
@@ -75,4 +94,6 @@ private:
     bool bottom_key = 0;
     bool left_key = 0;
     int top_cnt = 0;
+
+    static constexpr double m_max_vel = 5;
 };

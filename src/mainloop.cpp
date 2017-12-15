@@ -15,7 +15,7 @@ MainLoop::MainLoop()
     }
 
     {
-        m_fix_block_manager = std::make_unique<FixBlockManager>("../data/back_fix_block.txt");
+        m_fix_object_manager = std::make_unique<FixObjectManager>("../data/back_fix_object.txt");
     }
 
     m_event_manager = std::make_unique<EventManager>(m_event, m_input_type);
@@ -29,7 +29,7 @@ void MainLoop::execute()
     while (not m_exit_flag) {
         auto start_time = std::chrono::system_clock::now();
 
-        m_event_manager->execute(m_player_manager);  //!< イベントの処理
+        m_event_manager->execute(m_player_manager, m_window_vel_x, m_which_x);  //!< イベントの処理
 
         updatePos();        //!< 位置の更新
         updateCollision();  //!< 当たり判定
@@ -43,14 +43,17 @@ void MainLoop::execute()
 
 void MainLoop::updatePos()
 {
-    m_player_manager->updatePos();
-    m_fix_block_manager->updatePos();
-    //m_unique
+    //m_player_manager->updatePos();
+
+    if (m_which_x == 1) {
+        m_fix_object_manager->updateVelXAll(m_window_vel_x, 100);
+    }
+    m_fix_object_manager->updatePos();
 }
 
 void MainLoop::updateCollision()
 {
-    m_player_manager->updateCollision(m_fix_block_manager);
+    m_player_manager->updateCollision(m_fix_object_manager);
 }
 
 void MainLoop::draw()
@@ -60,7 +63,7 @@ void MainLoop::draw()
 
     // 描画
     m_player_manager->draw(m_window);
-    m_fix_block_manager->draw(m_window);
+    m_fix_object_manager->draw(m_window);
 
     // 更新
     SDL_UpdateRect(m_window, 0, 0, 0, 0);

@@ -94,7 +94,12 @@ public:
         m_vel = m_vel + Point{vel_x, vel_y};
         m_vel.setInRange(max_vel);
     }
-    void updateVelX(double vel_x, double max_vel = m_max_vel) { m_vel.x = MathUtil::setInRange(m_vel.x + vel_x, max_vel); }
+    void updateVelX(double vel_x, double max_vel = m_max_vel)
+    {
+
+        m_vel.x = MathUtil::setInRange(m_vel.x + vel_x, max_vel);
+        std::cout << vel_x << " " << m_vel.x << std::endl;
+    }
     void updateVelY(double vel_y, double max_vel = m_max_vel) { m_vel.y = MathUtil::setInRange(m_vel.y + vel_y, max_vel); }
 
 
@@ -126,9 +131,10 @@ protected:
 
     Point m_pos;
     Point m_vel;
+    constexpr static double m_max_vel = 5;
 
     double m_gravity = 0;
-    constexpr static double m_max_vel = 5;
+    double m_hit_point;
 
 private:
     SDL_Rect m_rect;

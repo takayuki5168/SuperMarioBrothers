@@ -3,11 +3,12 @@
 #include <fstream>
 #include "include/params.hpp"
 #include "include/abst_manager.hpp"
+#include "include/brick_block.hpp"
 
-class AbstFixObjectManager : public AbstManager
+class FixObjectManager : public AbstManager
 {
 public:
-    explicit AbstFixObjectManager(std::string file_name)
+    explicit FixObjectManager(std::string file_name)
         : AbstManager()
     {
         std::ifstream ifs(file_name);
@@ -22,6 +23,13 @@ public:
             for (int i = 0; i < str.size(); i++) {
                 int object = str[i];
                 m_object_map.at(cnt).at(i) = object;
+                switch (object) {
+                case '1':
+                    m_data.push_back(std::make_unique<BrickBlock>(i * object_size, cnt * object_size));
+                    break;
+                default:
+                    break;
+                }
             }
             cnt++;
         }
