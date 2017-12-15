@@ -105,8 +105,8 @@ public:
     {
         m_rect.x = static_cast<int>(m_pos.x + m_window_x);
         m_rect.y = static_cast<int>(m_pos.y);
-        m_rect.w = m_w; // TODO バグ
-        m_rect.h = m_h; // TODO バグ
+        m_rect.w = m_w;  // TODO バグ
+        m_rect.h = m_h;  // TODO バグ
         SDL_FillRect(m_window, &m_rect, m_color);
     }
 
@@ -126,6 +126,11 @@ public:
     void setGravity(double g) { m_gravity = g; }
     double getGravity() { return m_gravity; }
 
+    void setLeftCollision(bool flag) { m_left_collision_flag = flag; }
+    void setRightCollision(bool flag) { m_right_collision_flag = flag; }
+    bool getLeftCollision() { return m_left_collision_flag; }
+    bool getRightCollision() { return m_right_collision_flag; }
+
 protected:
     std::array<std::array<Point, 3>, 4> m_collision_point;
 
@@ -134,6 +139,9 @@ protected:
     constexpr static double m_max_vel = 5;
 
     double m_gravity = 0;
+    double m_left_collision_flag = false;
+    double m_right_collision_flag = false;
+
     double m_hit_point;
 
 private:

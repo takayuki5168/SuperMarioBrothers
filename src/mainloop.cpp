@@ -54,12 +54,7 @@ void MainLoop::updateCollision()
 }
 
 void MainLoop::draw()
-{ /*
-    std::cout << m_fix_object_manager->getData().at(2)->getRect().x << " "
-              << m_fix_object_manager->getData().at(2)->getRect().y << " "
-              << m_fix_object_manager->getData().at(2)->getRect().w << " "
-              << m_fix_object_manager->getData().at(2)->getRect().h << std::endl;
- */
+{
     m_window = SDL_GetVideoSurface();
     SDL_FillRect(m_window, &m_window_rect, SDL_MapRGB(m_window->format, 0, 0, 0));
 
@@ -69,9 +64,6 @@ void MainLoop::draw()
     // 描画
     m_player_manager->draw(m_window, m_window_x);
     m_fix_object_manager->draw(m_window, m_window_x);
-
-
-    SDL_FillRect(m_window, &rect, 0x00ff00);
 
     // 更新
     SDL_UpdateRect(m_window, 0, 0, 0, 0);

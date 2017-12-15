@@ -42,8 +42,6 @@ private:
 
     bool m_exit_flag = false;
     int m_input_type = 0;
-  
-    SDL_Rect rect = SDL_Rect{-10, 0, 100, 100};
 
     std::unique_ptr<FixObjectManager> m_fix_object_manager = nullptr;
     //std::unique_ptr<UniqueBlockManager> m_unique_block_manager = nullptr;

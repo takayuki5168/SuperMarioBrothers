@@ -51,6 +51,8 @@ public:
     void updateCollisionWithFixObject(std::unique_ptr<FixObjectManager>& fix_object_manager)
     {
         for (int i = 0; i < m_data.size(); i++) {
+            m_data.at(i)->setLeftCollision(false);
+            m_data.at(i)->setRightCollision(false);
             for (int j = 0; j < 4; j++) {
                 const auto point = m_data.at(i)->getCollisionPoint(j);
                 m_collision_fix_object_flag.at(j) = false;
@@ -58,11 +60,16 @@ public:
                 for (auto p : point) {
                     object_x = (p.x - static_cast<int>(p.x) % AbstFixObject::getObjectSize());
                     object_y = (p.y - static_cast<int>(p.y) % AbstFixObject::getObjectSize());
-                    int x = MathUtil::setInRange(object_x / AbstFixObject::getObjectSize(), 16, 0);
-                    int y = MathUtil::setInRange(object_y / AbstFixObject::getObjectSize(), 12, 0);
+                    int x = MathUtil::setInRange(object_x / AbstFixObject::getObjectSize(), 100, 0);  // TODO
+                    int y = MathUtil::setInRange(object_y / AbstFixObject::getObjectSize(), 12, 0);   // TODO
 
                     if (fix_object_manager->getObjectMap().at(y).at(x) != '0') {
                         m_collision_fix_object_flag.at(j) = true;
+                        if (j == 1) {
+                            m_data.at(i)->setRightCollision(true);
+                        } else if (j == 3) {
+                            m_data.at(i)->setLeftCollision(true);
+                        }
                     }
                 }
 
@@ -74,8 +81,6 @@ public:
             }
         }
     }
-
-    std::array<bool, 4> getCollisionFixObjectFlag() { return m_collision_fix_object_flag; }
 
 protected:
     std::array<bool, 4> m_collision_fix_object_flag = std::array<bool, 4>{false, false, false, false};  // !< 衝突しているかどうかの判定フラグ

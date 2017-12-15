@@ -18,8 +18,16 @@ public:
         if (m_input_type == 0) {
             if (SDL_PollEvent(&m_event)) {
                 if (m_event.type == SDL_KEYDOWN) {
-                    if (m_event.key.keysym.sym == SDLK_UP and player_manager->getData().at(player)->getGravity() == 0) {
-                        top_key = true;
+                    if (m_event.key.keysym.sym == SDLK_UP) {
+                        if (player_manager->getData().at(player)->getGravity() == 0) {
+                            top_key = true;
+                        } else if (player_manager->getData().at(player)->getLeftCollision() == true) {
+                            player_manager->setVelY(player, -5.0);
+                            player_manager->updateVelX(player, 2.0, 2.0);
+                        } else if (player_manager->getData().at(player)->getRightCollision() == true) {
+                            player_manager->setVelY(player, -5.0);
+                            player_manager->updateVelX(player, -2.0, 2.0);
+                        }
                     } else if (m_event.key.keysym.sym == SDLK_DOWN) {
                         bottom_key = true;
                     } else if (m_event.key.keysym.sym == SDLK_RIGHT) {
@@ -41,11 +49,11 @@ public:
             }
 
             if (top_key and top_cnt > 0) {
-                player_manager->updateVelY(player, -0.5);
+                player_manager->updateVelY(player, -0.6);
                 top_cnt--;
             } else {
                 top_key = false;
-                top_cnt = 12;
+                top_cnt = 15;
             }
             if (right_key) {
                 if (player_manager->getData().at(player)->getGravity() == 0) {
