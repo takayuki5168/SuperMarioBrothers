@@ -12,7 +12,10 @@ public:
     virtual void add(std::unique_ptr<AbstObject> object)
     {
         m_data.push_back(std::move(object));
+        addDecorator();
     }
+
+    virtual void addDecorator(){};
 
     virtual void updatePos()
     {
@@ -54,6 +57,8 @@ public:
             m_data.at(i)->draw(window, window_x);
         }
     }
+
+    virtual void updatePosVelAfterCollision() {}
 
     const std::vector<std::unique_ptr<AbstObject>>& getData() { return m_data; }
 

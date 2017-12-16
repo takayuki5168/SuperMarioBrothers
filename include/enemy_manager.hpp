@@ -1,13 +1,13 @@
 #pragma once
 
 #include "include/abst_dynamic_object_manager.hpp"
-#include "include/abst_player.hpp"
+#include "include/abst_enemy.hpp"
 #include "fix_object_manager.hpp"
 
-class PlayerManager : public AbstDynamicObjectManager
+class EnemyManager : public AbstDynamicObjectManager
 {
 public:
-    PlayerManager() : AbstDynamicObjectManager() {}
+    EnemyManager() : AbstDynamicObjectManager() {}
 
     void updateCollision(std::unique_ptr<FixObjectManager>& fix_object_manager)
     {

@@ -34,13 +34,15 @@ public:
         Point end_point = Point{0, 0};
     };
 
+    /*
     AbstObject(int x, int y, int w, int h, int color, std::string name,
         std::array<std::array<Point, 3>, 4> collision_point)
         : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),
           m_name(name), m_color(color),
           m_collision_point(std::move(collision_point)), m_w(w), m_h(h) {}
+  */
 
-    AbstObject(int x, int y, int w, int h, int color, std::string name)
+    explicit AbstObject(int x, int y, int w, int h, int color, std::string name)
         : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),
           m_name(name), m_color(color), m_w(w), m_h(h)
     {
@@ -131,6 +133,10 @@ public:
     bool getLeftCollision() { return m_left_collision_flag; }
     bool getRightCollision() { return m_right_collision_flag; }
 
+    std::array<std::function<void(int, int)>, 4> getCollisionTrueFixObjectFunc() { return m_collision_true_fix_object_func; }
+    std::array<std::function<void(int, int)>, 4> getCollisionFalseFixObjectFunc() { return m_collision_false_fix_object_func; }
+    std::string getName() { return m_name; }
+
 protected:
     std::array<std::array<Point, 3>, 4> m_collision_point;
 
@@ -139,10 +145,15 @@ protected:
     constexpr static double m_max_vel = 5;
 
     double m_gravity = 0;
-    double m_left_collision_flag = false;
-    double m_right_collision_flag = false;
+    bool m_left_collision_flag = false;
+    bool m_right_collision_flag = false;
 
     double m_hit_point;
+
+    std::array<std::function<void(int object_x, int object_y)>, 4> m_collision_true_fix_object_func
+        = std::array<std::function<void(int, int)>, 4>{[](int, int) {}, [](int, int) {}, [](int, int) {}, [](int, int) {}};  // !< 衝突した時の処理関数
+    std::array<std::function<void(int object_x, int object_y)>, 4> m_collision_false_fix_object_func
+        = std::array<std::function<void(int, int)>, 4>{[](int, int) {}, [](int, int) {}, [](int, int) {}, [](int, int) {}};  // !< 衝突していない時の処理関数
 
 private:
     SDL_Rect m_rect;

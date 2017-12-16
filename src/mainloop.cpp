@@ -2,20 +2,38 @@
 #include <chrono>
 #include "include/mainloop.hpp"
 #include "include/params.hpp"
+#include "include/mario.hpp"
+#include "include/kuribo.hpp"
 
 MainLoop::MainLoop()
 {
     m_window_rect = SDL_Rect{0, 0, static_cast<uint16_t>(Params::WINDOW_WIDTH), static_cast<uint16_t>(Params::WINDOW_HEIGHT)};
 
-    {
+    {  // Player
+        // TODO 消すとせぐふぉる
         m_player_manager = std::make_unique<PlayerManager>();
 
         auto mario = std::make_unique<Mario>();
         m_player_manager->add(std::move(mario));
     }
 
-    {
+    {  // Enemy
+        m_enemy_manager = std::make_unique<EnemyManager>();
+
+        auto kuribo = std::make_unique<Kuribo>();
+        m_enemy_manager->add(std::move(kuribo));
+    }
+
+    {  // Item
+        m_item_manager = std::make_unique<ItemManager>();
+
+        //auto kuribo = std::make_unique<Kuribo>();
+        //m_item_manager->add(std::move(kuribo));
+    }
+
+    {  // FixObject
         m_fix_object_manager = std::make_unique<FixObjectManager>("../data/back_fix_object.txt");
+        //m_unique_object_manager = std::make_unique<UniqueObjectManager>();
     }
 
     m_event_manager = std::make_unique<EventManager>(m_event, m_input_type);
@@ -44,13 +62,16 @@ void MainLoop::execute()
 void MainLoop::updatePos()
 {
     m_player_manager->updatePos();
+    m_enemy_manager->updatePos();
+    m_item_manager->updatePos();
     m_fix_object_manager->updatePos();
-    //m_fix_object_manager->showVelXAll();
 }
 
 void MainLoop::updateCollision()
 {
     m_player_manager->updateCollision(m_fix_object_manager);
+    m_enemy_manager->updateCollision(m_fix_object_manager);
+    m_item_manager->updateCollision(m_fix_object_manager);
 }
 
 void MainLoop::draw()
@@ -63,6 +84,8 @@ void MainLoop::draw()
 
     // 描画
     m_player_manager->draw(m_window, m_window_x);
+    m_enemy_manager->draw(m_window, m_window_x);
+    m_item_manager->draw(m_window, m_window_x);
     m_fix_object_manager->draw(m_window, m_window_x);
 
     // 更新

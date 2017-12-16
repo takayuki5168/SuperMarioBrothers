@@ -7,10 +7,10 @@
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_mixer.h>
 #include "include/event_manager.hpp"
-#include "include/mario.hpp"
-#include "include/abst_fix_object.hpp"
 #include "include/fix_object_manager.hpp"
 #include "include/player_manager.hpp"
+#include "include/enemy_manager.hpp"
+#include "include/item_manager.hpp"
 
 class MainLoop
 {
@@ -46,8 +46,10 @@ private:
     std::unique_ptr<FixObjectManager> m_fix_object_manager = nullptr;
     //std::unique_ptr<UniqueBlockManager> m_unique_block_manager = nullptr;
     std::unique_ptr<PlayerManager> m_player_manager = nullptr;
-    //std::unique_ptr<EnemyManager>m_enemy_manager= nullptr;
-    std::unique_ptr<EventManager> m_event_manager = nullptr;  //std::make_unique<EventManager>(m_event);
+    std::unique_ptr<EnemyManager> m_enemy_manager = nullptr;
+    std::unique_ptr<ItemManager> m_item_manager = nullptr;
+
+    std::unique_ptr<EventManager> m_event_manager = nullptr;
 };
 
 inline MainLoop& mainLoop() { return MainLoop::instance(); }
