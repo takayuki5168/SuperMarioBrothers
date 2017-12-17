@@ -26,6 +26,7 @@ public:
         double x = 0;
         double y = 0;
     };
+
     struct Line {
         Line() = default;
         Line(double x1, double y1, double x2, double y2)
@@ -33,14 +34,6 @@ public:
         Point start_point = Point{0, 0};
         Point end_point = Point{0, 0};
     };
-
-    /*
-    AbstObject(int x, int y, int w, int h, int color, std::string name,
-        std::array<std::array<Point, 3>, 4> collision_point)
-        : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),
-          m_name(name), m_color(color),
-          m_collision_point(std::move(collision_point)), m_w(w), m_h(h) {}
-  */
 
     explicit AbstObject(int x, int y, int w, int h, int color, std::string name)
         : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),

@@ -11,5 +11,5 @@ public:
     static constexpr int getObjectSize() { return m_object_size; }
 
 private:
-    static const int m_object_size = 40;
+    static constexpr int m_object_size = 40;
 };

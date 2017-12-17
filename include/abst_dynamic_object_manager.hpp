@@ -9,12 +9,9 @@ class AbstDynamicObjectManager : public AbstManager
 public:
     explicit AbstDynamicObjectManager() : AbstManager() {}
 
-    /*!
-     * @brief   addするときに付随する関数を登録する
-     */
     virtual void addDecorator()
     {
-        // 衝突している時、していない時の関数の登録
+        // 衝突している時、していない時の処理関数の登録
         m_collision_true_fix_object_func.push_back(std::move(m_data.back()->getCollisionTrueFixObjectFunc()));
         m_collision_false_fix_object_func.push_back(std::move(m_data.back()->getCollisionFalseFixObjectFunc()));
     }
@@ -55,6 +52,8 @@ public:
             }
         }
     }
+
+    void updateCollisionWithDynamicObject(std::unique_ptr<AbstDynamicObjectManager>& dynamic_object_manager) {}
 
 protected:
     std::array<bool, 4> m_collision_fix_object_flag = std::array<bool, 4>{false, false, false, false};  // !< 衝突しているかどうかの判定フラグ
