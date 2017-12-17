@@ -3,15 +3,15 @@
 #include <SDL/SDL.h>
 #include <iostream>
 #include <memory>
-#include "include/player_manager.hpp"
+#include "include/abst_player.hpp"
 
 class EventManager
 {
 public:
-    EventManager(SDL_Event event, int input_type)
-        : m_event(event), m_input_type(input_type) {}
+    EventManager(SDL_Event event, int input_type, std::vector<std::shared_ptr<AbstPlayer>> player_vec)
+        : m_event(event), m_input_type(input_type), m_player_vec(player_vec) {}
 
-    void execute(std::unique_ptr<PlayerManager>& player_manager)
+    void execute()
     {
         int player = 0;
 
@@ -19,14 +19,14 @@ public:
             if (SDL_PollEvent(&m_event)) {
                 if (m_event.type == SDL_KEYDOWN) {
                     if (m_event.key.keysym.sym == SDLK_UP) {
-                        if (player_manager->getData().at(player)->getGravity() == 0) {
+                        if (m_player_vec.at(player)->getGravity() == 0) {
                             top_key = true;
-                        } else if (player_manager->getData().at(player)->getLeftCollision() == true) {
-                            player_manager->setVelY(player, -5.0);
-                            player_manager->updateVelX(player, 2.0, 2.0);
-                        } else if (player_manager->getData().at(player)->getRightCollision() == true) {
-                            player_manager->setVelY(player, -5.0);
-                            player_manager->updateVelX(player, -2.0, 2.0);
+                        } else if (m_player_vec.at(player)->getCollision(3) == true) {  // 壁キック
+                            m_player_vec.at(player)->setVelY(-5.0);
+                            m_player_vec.at(player)->updateVelX(2.0, 2.0);
+                        } else if (m_player_vec.at(player)->getCollision(1) == true) {  // 壁キック
+                            m_player_vec.at(player)->setVelY(-5.0);
+                            m_player_vec.at(player)->updateVelX(-2.0, 2.0);
                         }
                     } else if (m_event.key.keysym.sym == SDLK_DOWN) {
                         bottom_key = true;
@@ -49,26 +49,26 @@ public:
             }
 
             if (top_key and top_cnt > 0) {
-                player_manager->updateVelY(player, -0.6);
+                m_player_vec.at(player)->updateVelY(-0.6);
                 top_cnt--;
             } else {
                 top_key = false;
                 top_cnt = 15;
             }
             if (right_key) {
-                if (player_manager->getData().at(player)->getGravity() == 0) {
-                    player_manager->updateVelX(player, 0.2, 3);
+                if (m_player_vec.at(player)->getGravity() == 0) {
+                    m_player_vec.at(player)->updateVelX(0.2, 3);
                 } else {
-                    player_manager->updateVelX(player, 0.05, 2.5);
+                    m_player_vec.at(player)->updateVelX(0.05, 2.5);
                 }
             }
             if (bottom_key) {
             }
             if (left_key) {
-                if (player_manager->getData().at(player)->getGravity() == 0) {
-                    player_manager->updateVelX(player, -0.2, 3);
+                if (m_player_vec.at(player)->getGravity() == 0) {
+                    m_player_vec.at(player)->updateVelX(-0.2, 3);
                 } else {
-                    player_manager->updateVelX(player, -0.05, 2.5);
+                    m_player_vec.at(player)->updateVelX(-0.05, 2.5);
                 }
             }
         }
@@ -84,4 +84,6 @@ private:
     bool bottom_key = 0;
     bool left_key = 0;
     int top_cnt = 0;
+
+    std::vector<std::shared_ptr<AbstPlayer>> m_player_vec;
 };

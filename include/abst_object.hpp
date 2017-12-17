@@ -26,7 +26,7 @@ public:
         double x = 0;
         double y = 0;
     };
-
+    /*
     struct Line {
         Line() = default;
         Line(double x1, double y1, double x2, double y2)
@@ -34,6 +34,7 @@ public:
         Point start_point = Point{0, 0};
         Point end_point = Point{0, 0};
     };
+  */
 
     explicit AbstObject(int x, int y, int w, int h, int color, std::string name)
         : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),
@@ -63,8 +64,10 @@ public:
             std::move(left_point)});
     }
 
-    virtual void updatePos()
+    virtual void updatePosDecorator(double time) {}
+    virtual void updatePos(double time)
     {
+        updatePosDecorator(time);
         m_vel.y += m_gravity;
         m_vel.setInRange(m_max_vel);
         m_pos = m_pos + m_vel;
@@ -105,8 +108,6 @@ public:
         SDL_FillRect(m_window, &m_rect, m_color);
     }
 
-    virtual void updateCollision() {}
-
     std::array<Point, 3> getCollisionPoint(int i)
     {
         return std::array<Point, 3>{
@@ -121,14 +122,34 @@ public:
     void setGravity(double g) { m_gravity = g; }
     double getGravity() { return m_gravity; }
 
-    void setLeftCollision(bool flag) { m_left_collision_flag = flag; }
-    void setRightCollision(bool flag) { m_right_collision_flag = flag; }
-    bool getLeftCollision() { return m_left_collision_flag; }
-    bool getRightCollision() { return m_right_collision_flag; }
+    // !< 4辺が衝突しているかどうか
+    void setCollisionFixObjectTrue(int i) { m_collision_fix_object_flag.at(i) = true; }
+    void setCollisionFixObjectFalseAll()
+    {
+        for (int i = 0; i < 4; i++) {
+            m_collision_fix_object_flag.at(i) = false;
+        }
+    }
+    bool getCollisionFixObject(int i) { return m_collision_fix_object_flag.at(i); }
 
-    std::array<std::function<void(int, int)>, 4> getCollisionTrueFixObjectFunc() { return m_collision_true_fix_object_func; }
-    std::array<std::function<void(int, int)>, 4> getCollisionFalseFixObjectFunc() { return m_collision_false_fix_object_func; }
+    void setCollisionUniqueObjectTrue(int i) { m_collision_unique_object_flag.at(i) = true; }
+    void setCollisionUniqueObjectFalseAll()
+    {
+        for (int i = 0; i < 4; i++) {
+            m_collision_unique_object_flag.at(i) = false;
+        }
+    }
+    bool getCollisionUniqueObject(int i) { return m_collision_unique_object_flag.at(i); }
+
+    bool getCollision(int i) { return m_collision_fix_object_flag.at(i) or m_collision_unique_object_flag.at(i); }
+
+
     std::string getName() { return m_name; }
+
+    std::function<void(int, int)> getCollisionTrueFixObjectFunc(int i) { return m_collision_true_fix_object_func.at(i); }
+    std::function<void(int, int)> getCollisionFalseFixObjectFunc(int i) { return m_collision_false_fix_object_func.at(i); }
+    std::function<void(int, int, int, int)> getCollisionTrueUniqueObjectFunc(int i) { return m_collision_true_unique_object_func.at(i); }
+    std::function<void(int, int, int, int)> getCollisionFalseUniqueObjectFunc(int i) { return m_collision_false_unique_object_func.at(i); }
 
 protected:
     std::array<std::array<Point, 3>, 4> m_collision_point;
@@ -138,8 +159,13 @@ protected:
     constexpr static double m_max_vel = 5;
 
     double m_gravity = 0;
-    bool m_left_collision_flag = false;
-    bool m_right_collision_flag = false;
+
+    // !< 左辺・右辺が衝突しているかどうか
+    //bool m_left_collision_flag = false;
+    //bool m_right_collision_flag = false;
+    // !< 4辺が衝突しているかどうか
+    std::array<bool, 4> m_collision_fix_object_flag;
+    std::array<bool, 4> m_collision_unique_object_flag;
 
     double m_hit_point;
 
@@ -147,8 +173,12 @@ protected:
         = std::array<std::function<void(int, int)>, 4>{[](int, int) {}, [](int, int) {}, [](int, int) {}, [](int, int) {}};  // !< 衝突した時の処理関数
     std::array<std::function<void(int object_x, int object_y)>, 4> m_collision_false_fix_object_func
         = std::array<std::function<void(int, int)>, 4>{[](int, int) {}, [](int, int) {}, [](int, int) {}, [](int, int) {}};  // !< 衝突していない時の処理関数
+    std::array<std::function<void(int object_x, int object_y, int, int)>, 4> m_collision_true_unique_object_func
+        = std::array<std::function<void(int, int, int, int)>, 4>{[](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}};  // !< 衝突した時の処理関数
+    std::array<std::function<void(int object_x, int object_y, int, int)>, 4> m_collision_false_unique_object_func
+        = std::array<std::function<void(int, int, int, int)>, 4>{[](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}};  // !< 衝突していない時の処理関数
 
-private:
+    //private:
     SDL_Rect m_rect;
     int m_color;
     std::string m_name;

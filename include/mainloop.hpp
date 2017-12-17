@@ -2,15 +2,18 @@
 
 #include <iostream>
 #include <memory>
+#include <chrono>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_mixer.h>
 #include "include/event_manager.hpp"
-#include "include/fix_object_manager.hpp"
-#include "include/player_manager.hpp"
-#include "include/enemy_manager.hpp"
-#include "include/item_manager.hpp"
+#include "include/collision_manager.hpp"
+#include "include/abst_player.hpp"
+#include "include/abst_enemy.hpp"
+#include "include/abst_item.hpp"
+#include "include/abst_fix_object.hpp"
+#include "include/abst_unique_object.hpp"
 
 class MainLoop
 {
@@ -43,13 +46,19 @@ private:
     bool m_exit_flag = false;
     int m_input_type = 0;
 
-    std::unique_ptr<FixObjectManager> m_fix_object_manager = nullptr;
-    //std::unique_ptr<UniqueBlockManager> m_unique_block_manager = nullptr;
-    std::unique_ptr<PlayerManager> m_player_manager = nullptr;
-    std::unique_ptr<EnemyManager> m_enemy_manager = nullptr;
-    std::unique_ptr<ItemManager> m_item_manager = nullptr;
-
     std::unique_ptr<EventManager> m_event_manager = nullptr;
+    std::unique_ptr<CollisionManager> m_collision_manager = nullptr;
+
+    std::vector<std::shared_ptr<AbstPlayer>> m_player_vec;
+    std::vector<std::shared_ptr<AbstEnemy>> m_enemy_vec;
+    std::vector<std::shared_ptr<AbstItem>> m_item_vec;
+    std::vector<std::shared_ptr<AbstFixObject>> m_fix_object_vec;
+    std::vector<std::shared_ptr<AbstUniqueObject>> m_unique_object_vec;
+
+    std::vector<std::vector<int>> m_fix_object_map;
+
+    std::chrono::system_clock::time_point m_start_chrono_time;
+    double m_time;
 };
 
 inline MainLoop& mainLoop() { return MainLoop::instance(); }

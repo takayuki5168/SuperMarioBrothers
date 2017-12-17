@@ -1,12 +1,12 @@
 #pragma once
 
-#include "include/abst_object.hpp"
+#include "include/abst_static_object.hpp"
 
-class AbstFixObject : public AbstObject
+class AbstFixObject : public AbstStaticObject
 {
 public:
-    AbstFixObject(int x, int y, int color, std::string name)
-        : AbstObject(x, y, m_object_size, m_object_size, color, name) {}
+    explicit AbstFixObject(int x, int y, int color, std::string name)
+        : AbstStaticObject(x, y, m_object_size, m_object_size, color, name) {}
 
     static constexpr int getObjectSize() { return m_object_size; }
 

@@ -21,14 +21,14 @@ public:
      */
     void updateCollisionWithFixObject(std::unique_ptr<FixObjectManager>& fix_object_manager)
     {
-        for (int i = 0; i < m_data.size(); i++) {
+        for (int i = 0; i < m_data.size(); i++) {  // キャラクターごと
             m_data.at(i)->setLeftCollision(false);
             m_data.at(i)->setRightCollision(false);
-            for (int j = 0; j < 4; j++) {
+            for (int j = 0; j < 4; j++) {  // どの辺か
                 const auto point = m_data.at(i)->getCollisionPoint(j);
                 m_collision_fix_object_flag.at(j) = false;
                 int object_x, object_y;
-                for (auto p : point) {
+                for (auto p : point) {  // 辺のうちのどの点か
                     object_x = (p.x - static_cast<int>(p.x) % AbstFixObject::getObjectSize());
                     object_y = (p.y - static_cast<int>(p.y) % AbstFixObject::getObjectSize());
                     int x = MathUtil::setInRange(object_x / AbstFixObject::getObjectSize(), 35, 0);  // TODO
