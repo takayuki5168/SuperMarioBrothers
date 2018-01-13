@@ -2,11 +2,11 @@
 
 #include "include/abst_unique_object.hpp"
 
-class WoodenLift : public AbstUniqueObject
+class WoodenHorizontalLift : public AbstUniqueObject
 {
 public:
-    WoodenLift(int x, int y)
-        : AbstUniqueObject(x, y, m_width, m_height, 0x8d3800, "WoodenLift") {}
+    WoodenHorizontalLift(int x, int y)
+        : AbstUniqueObject(x, y, m_width, m_height, 0x8d3800, "WoodenHorizontalLift") {}
 
     virtual void updatePosDecorator(double time)
     {
@@ -20,7 +20,6 @@ public:
             //updateVelY(0.01);
         }
     }
-
 
 private:
     static constexpr int m_width = 120;

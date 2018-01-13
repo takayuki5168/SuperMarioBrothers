@@ -17,6 +17,8 @@ public:
         Point(double x, int y)
             : x(x), y(y) {}
         Point operator+(Point other) { return Point{x + other.x, y + other.y}; }
+        Point operator-(Point other) { return Point{x - other.x, y - other.y}; }
+
         void setInRange(double max)
         {
             x = MathUtil::setInRange(x, max);
@@ -37,7 +39,7 @@ public:
   */
 
     explicit AbstObject(int x, int y, int w, int h, int color, std::string name)
-        : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),
+        : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),  // m_pos_diff(Point{0, 0}),
           m_name(name), m_color(color), m_w(w), m_h(h)
     {
         std::array<Point, 3> top_point = std::array<Point, 3>{
@@ -67,21 +69,25 @@ public:
     virtual void updatePosDecorator(double time) {}
     virtual void updatePos(double time)
     {
-        updatePosDecorator(time);
+        m_pre_pos = m_pos;
+        updatePosDecorator(time);  //!< 主に敵の自由な動作に使う
         m_vel.y += m_gravity;
         m_vel.setInRange(m_max_vel);
         m_pos = m_pos + m_vel;
     }
 
     Point getPos() { return m_pos; }
-    SDL_Rect getRect() { return m_rect; }
+    Point getPrePos() { return m_pre_pos; }
+    //SDL_Rect getRect() { return m_rect; }
 
     void setPos(Point pos) { m_pos = pos; }
+    //void setPosDiff(Point pos_diff) { m_pos_diff = pos_diff; }
     void setPosX(double x) { m_pos.x = x; }
     void setPosY(double y) { m_pos.y = y; }
 
     Point getVel() { return m_vel; }
 
+    void updatePos(Point pos) { m_pos = m_pos + pos; }
     void setVel(double vel_x, double vel_y) { m_vel = Point{vel_x, vel_y}; }
     void setVelX(double vel_x) { m_vel.x = vel_x; }
     void setVelXPlus() { m_vel.x = MathUtil::setPlus(m_vel.x); }
@@ -146,15 +152,17 @@ public:
 
     std::string getName() { return m_name; }
 
-    std::function<void(int, int)> getCollisionTrueFixObjectFunc(int i) { return m_collision_true_fix_object_func.at(i); }
-    std::function<void(int, int)> getCollisionFalseFixObjectFunc(int i) { return m_collision_false_fix_object_func.at(i); }
-    std::function<void(int, int, int, int)> getCollisionTrueUniqueObjectFunc(int i) { return m_collision_true_unique_object_func.at(i); }
-    std::function<void(int, int, int, int)> getCollisionFalseUniqueObjectFunc(int i) { return m_collision_false_unique_object_func.at(i); }
+    std::function<void(Point, Point, Point)> getCollisionTrueFixObjectFunc(int i) { return m_collision_true_fix_object_func.at(i); }
+    std::function<void(Point, Point, Point)> getCollisionFalseFixObjectFunc(int i) { return m_collision_false_fix_object_func.at(i); }
+    std::function<void(Point, Point, Point)> getCollisionTrueUniqueObjectFunc(int i) { return m_collision_true_unique_object_func.at(i); }
+    std::function<void(Point, Point, Point)> getCollisionFalseUniqueObjectFunc(int i) { return m_collision_false_unique_object_func.at(i); }
 
 protected:
     std::array<std::array<Point, 3>, 4> m_collision_point;
 
     Point m_pos;
+    Point m_pre_pos;
+    //Point m_pos_diff;  //!< 差分ではなくdiffとして足したい値
     Point m_vel;
     constexpr static double m_max_vel = 5;
 
@@ -169,14 +177,14 @@ protected:
 
     double m_hit_point;
 
-    std::array<std::function<void(int object_x, int object_y)>, 4> m_collision_true_fix_object_func
-        = std::array<std::function<void(int, int)>, 4>{[](int, int) {}, [](int, int) {}, [](int, int) {}, [](int, int) {}};  // !< 衝突した時の処理関数
-    std::array<std::function<void(int object_x, int object_y)>, 4> m_collision_false_fix_object_func
-        = std::array<std::function<void(int, int)>, 4>{[](int, int) {}, [](int, int) {}, [](int, int) {}, [](int, int) {}};  // !< 衝突していない時の処理関数
-    std::array<std::function<void(int object_x, int object_y, int, int)>, 4> m_collision_true_unique_object_func
-        = std::array<std::function<void(int, int, int, int)>, 4>{[](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}};  // !< 衝突した時の処理関数
-    std::array<std::function<void(int object_x, int object_y, int, int)>, 4> m_collision_false_unique_object_func
-        = std::array<std::function<void(int, int, int, int)>, 4>{[](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}, [](int, int, int, int) {}};  // !< 衝突していない時の処理関数
+    std::array<std::function<void(Point object, Point wh, Point vel)>, 4> m_collision_true_fix_object_func
+        = std::array<std::function<void(Point, Point, Point)>, 4>{[](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}};  // !< 衝突した時の処理関数
+    std::array<std::function<void(Point object, Point wh, Point vel)>, 4> m_collision_false_fix_object_func
+        = std::array<std::function<void(Point, Point, Point)>, 4>{[](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}};  // !< 衝突していない時の処理関数
+    std::array<std::function<void(Point object, Point wh, Point vel)>, 4> m_collision_true_unique_object_func
+        = std::array<std::function<void(Point, Point, Point)>, 4>{[](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}};  // !< 衝突した時の処理関数
+    std::array<std::function<void(Point object, Point wh, Point vel)>, 4> m_collision_false_unique_object_func
+        = std::array<std::function<void(Point, Point, Point)>, 4>{[](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}};  // !< 衝突していない時の処理関数
 
     //private:
     SDL_Rect m_rect;

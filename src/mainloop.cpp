@@ -6,7 +6,8 @@
 #include "include/kuribo.hpp"
 #include "include/gabon.hpp"
 #include "include/brick_block.hpp"
-#include "include/wooden_lift.hpp"
+#include "include/wooden_horizontal_lift.hpp"
+#include "include/wooden_circle_lift.hpp"
 
 MainLoop::MainLoop()
 {
@@ -50,6 +51,8 @@ MainLoop::MainLoop()
                 case '1':
                     m_fix_object_vec.push_back(std::make_shared<BrickBlock>(i * object_size, cnt * object_size));
                     break;
+                case '2':
+                    break;
                 default:
                     break;
                 }
@@ -59,8 +62,11 @@ MainLoop::MainLoop()
     }
 
     {  // UniqueObject
-        auto wooden_lift1 = std::make_unique<WoodenLift>(80, 240);
-        m_unique_object_vec.push_back(std::move(wooden_lift1));
+        auto wooden_circle_lift1 = std::make_unique<WoodenCircleLift>(400, 200);
+        m_unique_object_vec.push_back(std::move(wooden_circle_lift1));
+
+        auto wooden_horizontal_lift1 = std::make_unique<WoodenHorizontalLift>(80, 240);
+        m_unique_object_vec.push_back(std::move(wooden_horizontal_lift1));
     }
 
     {  // EventManager

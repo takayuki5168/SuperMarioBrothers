@@ -19,7 +19,7 @@ public:
             if (SDL_PollEvent(&m_event)) {
                 if (m_event.type == SDL_KEYDOWN) {
                     if (m_event.key.keysym.sym == SDLK_UP) {
-                        if (m_player_vec.at(player)->getGravity() == 0) {
+                        if (m_player_vec.at(player)->getGravity() == 0) {  // ジャンプ
                             top_key = true;
                         } else if (m_player_vec.at(player)->getCollision(3) == true) {  // 壁キック
                             m_player_vec.at(player)->setVelY(-5.0);
@@ -49,7 +49,7 @@ public:
             }
 
             if (top_key and top_cnt > 0) {
-                m_player_vec.at(player)->updateVelY(-0.6);
+                m_player_vec.at(player)->updateVelY(-0.7);
                 top_cnt--;
             } else {
                 top_key = false;
@@ -57,18 +57,18 @@ public:
             }
             if (right_key) {
                 if (m_player_vec.at(player)->getGravity() == 0) {
-                    m_player_vec.at(player)->updateVelX(0.2, 3);
+                    m_player_vec.at(player)->updateVelX(0.3, 3);
                 } else {
-                    m_player_vec.at(player)->updateVelX(0.05, 2.5);
+                    m_player_vec.at(player)->updateVelX(0.1, 2.5);
                 }
             }
             if (bottom_key) {
             }
             if (left_key) {
                 if (m_player_vec.at(player)->getGravity() == 0) {
-                    m_player_vec.at(player)->updateVelX(-0.2, 3);
+                    m_player_vec.at(player)->updateVelX(-0.3, 3);
                 } else {
-                    m_player_vec.at(player)->updateVelX(-0.05, 2.5);
+                    m_player_vec.at(player)->updateVelX(-0.1, 2.5);
                 }
             }
         }
