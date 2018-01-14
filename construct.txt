@@ -32,3 +32,38 @@ EnemyManager
 *衝突判定
 **FixObjectとの衝突判定
 *描画
+
+
+
+
+Abstraction
+*衝突点の初期化
+**衝突点の位置に注意
+*衝突関数
+**衝突した時に自分が受ける影響
+**衝突した時相手が受ける影響
+*位置・速度の更新
+*m_is_alive
+*描画関数
+   |
+   |------------------------
+   |                        |          
+AbstCharacter              AbstObject      
+   |                        |
+   |-----------             |-----------------------------------
+   |          |             |                |                  |
+AbstPlayer   AbstEnemy     AbstRectObject   AbstUniqueObject   AbstItem
+
+						 
+
+大まかな処理
+*イベントの処理
+*位置・速度の更新
+*衝突判定
+**PlayerとPlayerの衝突判定
+**PlayerとEnemyの衝突
+**EnemyとEnemyの衝突判定
+**PlayerとObjectの衝突判定
+**EnemyとObjectの衝突判定
+*描画
+
