@@ -12,7 +12,7 @@
 #include "include/abst_player.hpp"
 #include "include/abst_enemy.hpp"
 #include "include/abst_item.hpp"
-#include "include/abst_fix_object.hpp"
+#include "include/abst_rect_object.hpp"
 #include "include/abst_unique_object.hpp"
 
 class MainLoop
@@ -31,10 +31,7 @@ public:
 
 private:
     MainLoop();
-    ~MainLoop()
-    {
-        delete m_window;
-    }
+    ~MainLoop() { delete m_window; }
 
     SDL_Surface* m_window;
     SDL_Rect m_window_rect;
@@ -46,16 +43,22 @@ private:
     bool m_exit_flag = false;
     int m_input_type = 0;
 
+    //!< マネージャークラスのポインタ
     std::unique_ptr<EventManager> m_event_manager = nullptr;
     std::unique_ptr<CollisionManager> m_collision_manager = nullptr;
 
+    //!< Abstractionの継承クラスのポインタ
     std::vector<std::shared_ptr<AbstPlayer>> m_player_vec;
     std::vector<std::shared_ptr<AbstEnemy>> m_enemy_vec;
+
     std::vector<std::shared_ptr<AbstItem>> m_item_vec;
-    std::vector<std::shared_ptr<AbstFixObject>> m_fix_object_vec;
+
+    std::vector<std::shared_ptr<AbstRectObject>> m_rect_object_vec;
     std::vector<std::shared_ptr<AbstUniqueObject>> m_unique_object_vec;
 
+    //!< マップ
     std::vector<std::vector<int>> m_fix_object_map;
+
 
     std::chrono::system_clock::time_point m_start_chrono_time;
     double m_time;

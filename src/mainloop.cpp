@@ -6,26 +6,29 @@
 #include "include/kuribo.hpp"
 #include "include/gabon.hpp"
 #include "include/brick_block.hpp"
-#include "include/wooden_horizontal_lift.hpp"
+#include "include/wooden_virtical_lift.hpp"
 #include "include/wooden_circle_lift.hpp"
 
+/*!
+ * @brief   コンストラクタ
+ */
 MainLoop::MainLoop()
 {
     m_window_rect = SDL_Rect{0, 0, static_cast<uint16_t>(Params::WINDOW_WIDTH), static_cast<uint16_t>(Params::WINDOW_HEIGHT)};
 
     {  // Player
-        auto mario = std::make_unique<Mario>();
+        std::shared_ptr<AbstPlayer> mario = std::make_shared<Mario>();
         m_player_vec.push_back(std::move(mario));
     }
 
     {  // Enemy
-        auto kuribo1 = std::make_unique<Kuribo>();
+        std::shared_ptr<AbstEnemy> kuribo1 = std::make_shared<Kuribo>();
         m_enemy_vec.push_back(std::move(kuribo1));
 
-        auto kuribo2 = std::make_unique<Kuribo>(1000);
+        std::shared_ptr<AbstEnemy> kuribo2 = std::make_shared<Kuribo>(1000);
         m_enemy_vec.push_back(std::move(kuribo2));
 
-        auto gabon1 = std::make_unique<Gabon>(100);
+        std::shared_ptr<AbstEnemy> gabon1 = std::make_shared<Gabon>(100);
         m_enemy_vec.push_back(std::move(gabon1));
     }
 
@@ -34,39 +37,30 @@ MainLoop::MainLoop()
         //m_item_vec.push_back(std::move(kuribo));
     }
 
-    {  // FixObject
+    {  // FixObjectMap
         std::ifstream ifs("../data/back_fix_object.txt");
         std::string str;
         int cnt = 0;
-        const int object_size = AbstFixObject::getObjectSize();
+        const int object_size = Params::BLOCK_SIZE;
 
         // 固定ブロックの初期化
         m_fix_object_map.resize(Params::WINDOW_HEIGHT / object_size);
         while (getline(ifs, str)) {
             m_fix_object_map.at(cnt).resize(str.size());
-            for (int i = 0; i < str.size(); i++) {
+            for (unsigned int i = 0; i < str.size(); i++) {
                 int object = str[i];
                 m_fix_object_map.at(cnt).at(i) = object;
-                switch (object) {
-                case '1':
-                    m_fix_object_vec.push_back(std::make_shared<BrickBlock>(i * object_size, cnt * object_size));
-                    break;
-                case '2':
-                    break;
-                default:
-                    break;
-                }
             }
             cnt++;
         }
     }
 
-    {  // UniqueObject
-        auto wooden_circle_lift1 = std::make_unique<WoodenCircleLift>(400, 200);
-        m_unique_object_vec.push_back(std::move(wooden_circle_lift1));
+    {  // RectObject
+        std::shared_ptr<AbstRectObject> wooden_circle_lift1 = std::make_shared<WoodenCircleLift>(400, 200);
+        m_rect_object_vec.push_back(std::move(wooden_circle_lift1));
 
-        auto wooden_horizontal_lift1 = std::make_unique<WoodenHorizontalLift>(80, 240);
-        m_unique_object_vec.push_back(std::move(wooden_horizontal_lift1));
+        std::shared_ptr<AbstRectObject> wooden_virtical_lift1 = std::make_shared<WoodenVirticalLift>(80, 240);
+        m_rect_object_vec.push_back(std::move(wooden_virtical_lift1));
     }
 
     {  // EventManager
@@ -74,7 +68,7 @@ MainLoop::MainLoop()
     }
 
     {  // CollisionManager
-        m_collision_manager = std::make_unique<CollisionManager>(m_player_vec, m_enemy_vec, m_fix_object_vec);
+        m_collision_manager = std::make_unique<CollisionManager>(m_player_vec, m_enemy_vec);
     }
 
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -83,6 +77,9 @@ MainLoop::MainLoop()
     m_start_chrono_time = std::chrono::system_clock::now();
 }
 
+/*!
+ * @brief   メインの実行関数
+ */
 void MainLoop::execute()
 {
     while (not m_exit_flag) {
@@ -100,6 +97,9 @@ void MainLoop::execute()
     }
 }
 
+/*!
+ * @brief   位置の更新関数
+ */
 void MainLoop::updatePos()
 {
     for (auto player : m_player_vec) {
@@ -111,50 +111,52 @@ void MainLoop::updatePos()
     for (auto item : m_item_vec) {
         item->updatePos(m_time);
     }
-    for (auto fix_object : m_fix_object_vec) {
-        fix_object->updatePos(m_time);
+    for (auto rect_object : m_rect_object_vec) {
+        rect_object->updatePos(m_time);
     }
     for (auto unique_object : m_unique_object_vec) {
         unique_object->updatePos(m_time);
     }
 }
 
+/*!
+ * @brief   衝突の更新関数
+ */
 void MainLoop::updateCollision()
 {
-    m_collision_manager->updateCollision(m_fix_object_map, m_unique_object_vec);
-    /*
-    m_player_vec->updateCollision(m_fix_object_manager);
-    m_enemy_manager->updateCollision(m_fix_object_manager);
-    m_item_manager->updateCollision(m_fix_object_manager);
-  */
+    m_collision_manager->updateCollision(m_fix_object_map, m_rect_object_vec, m_unique_object_vec, m_item_vec);
 }
 
+/*!
+ * @brief   描画関数
+ */
 void MainLoop::draw()
 {
     m_window = SDL_GetVideoSurface();
     SDL_FillRect(m_window, &m_window_rect, SDL_MapRGB(m_window->format, 0, 0, 0));
 
     // 基準点の変更
-    m_window_x = 300 - m_player_vec.at(0)->getPos().x;
+    m_window_x = 300 - m_player_vec.at(0)->getPos().m_x;
 
     // 描画
     for (auto player : m_player_vec) {
         player->draw(m_window, m_window_x);
+        std::cout << player->getPos().m_y << std::endl;
     }
+    /*
     for (auto enemy : m_enemy_vec) {
         enemy->draw(m_window, m_window_x);
     }
     for (auto item : m_item_vec) {
         item->draw(m_window, m_window_x);
     }
-    for (auto fix_object : m_fix_object_vec) {
-        fix_object->draw(m_window, m_window_x);
+    for (auto rect_object : m_rect_object_vec) {
+        rect_object->draw(m_window, m_window_x);
     }
     for (auto unique_object : m_unique_object_vec) {
         unique_object->draw(m_window, m_window_x);
     }
-
-
+	*/
     // 更新
     SDL_UpdateRect(m_window, 0, 0, 0, 0);
     SDL_Flip(m_window);

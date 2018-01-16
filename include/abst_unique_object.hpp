@@ -1,12 +1,12 @@
 #pragma once
 
-#include "include/abst_static_object.hpp"
+#include "include/abst_object.hpp"
 
-class AbstUniqueObject : public AbstStaticObject
+class AbstUniqueObject : public AbstObject
 {
 public:
-    explicit AbstUniqueObject(int x, int y, int w, int h, int color, std::string name)
-        : AbstStaticObject(x, y, w, h, color, name) {}
+    explicit AbstUniqueObject(int x, int y, int color, std::string name, std::vector<Point> frame_points)
+        : AbstObject(x, y, color, name, frame_points) {}
 
 private:
 };

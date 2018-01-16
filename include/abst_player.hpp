@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vector>
-#include "include/abst_dynamic_object.hpp"
+#include "include/abst_character.hpp"
 
-class AbstPlayer : public AbstDynamicObject
+class AbstPlayer : public AbstCharacter
 {
 public:
     explicit AbstPlayer(int x, int y, int w, int h, int color, std::string name)
-        : AbstDynamicObject(x, y, w, h, color, name) {}
+        : AbstCharacter(x, y, w, h, color, name) {}
 
 private:
 };
