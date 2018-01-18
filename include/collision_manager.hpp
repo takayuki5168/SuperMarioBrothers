@@ -44,33 +44,31 @@ public:
         std::vector<std::shared_ptr<AbstItem>> item_vec)
     {
         for (auto character : m_character_vec) {  // AbstPlayer, AbstEnemy
-                                                  //for (auto character_object : character_object_vec) {
             character->setCollisionAll(false);
             for (int j = 0; j < 4; j++) {  // !< 四辺
                 const auto point = character->getCollisionPoint(j);
 
+                bool collision_flag = false;
+                std::shared_ptr<Abstraction> dummy_abst_object = nullptr;
                 // Collision With FixMap
                 for (auto p : point) {  // 一辺のうち三点
                     int object_x = (p.m_x - static_cast<int>(p.m_x) % Params::BLOCK_SIZE);
                     int object_y = (p.m_y - static_cast<int>(p.m_y) % Params::BLOCK_SIZE);
                     int x = MathUtil::setInRange(object_x / Params::BLOCK_SIZE, 100);    //35, 0);  // TODO
                     int y = MathUtil::setInRange(object_y / Params::BLOCK_SIZE, 11, 0);  // TODO
-                    bool collision_flag = false;
-                    if (fix_object_map.at(y).at(x) != 0) {  // TODO
+                    if (fix_object_map.at(y).at(x) != 0) {                               // TODO
                         collision_flag = true;
                         character->setCollisionTrue(j);
                     }
-                    std::shared_ptr<Abstraction> dummy_abst_object = std::make_shared<Abstraction>(
+                    dummy_abst_object = std::make_shared<Abstraction>(
                         Params::BLOCK_SIZE * x, Params::BLOCK_SIZE * y, Params::BLOCK_SIZE, Params::BLOCK_SIZE, 0, "Dummy");
                     dummy_abst_object->setIdx(fix_object_map.at(y).at(x));
-
-                    if (not collision_flag) {
-                        character->callMyFuncCollisionFalseWithObject(j)(dummy_abst_object);
-                    } else {  // 衝突している
-                        character->callMyFuncCollisionTrueWithObject(j)(dummy_abst_object);
-                    }
                 }
-
+                if (not collision_flag) {
+                    character->callMyFuncCollisionFalseWithObject(j)(dummy_abst_object);
+                } else {  // 衝突している
+                    character->callMyFuncCollisionTrueWithObject(j)(dummy_abst_object);
+                }
 
                 // Collision With RectObject
                 for (auto abst_object : rect_object_vec) {

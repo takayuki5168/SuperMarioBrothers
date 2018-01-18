@@ -280,7 +280,7 @@ protected:
     double m_width, m_height;
 
     double m_friction;
-
+    double DEFAULT_FRICTION = 0.4;
 
 private:
     int m_color;

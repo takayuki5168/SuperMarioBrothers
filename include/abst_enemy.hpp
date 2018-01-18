@@ -10,6 +10,7 @@ public:
         : AbstCharacter(x, y, w, h, color, name)
     {
         setVelX(-1);
+        DEFAULT_FRICTION = 0;
 
         {
             m_my_func_collision_true_with_object.at(1)  // 右壁

@@ -28,14 +28,14 @@ public:
 
                 // 摩擦
                 if (abstraction->getIdx() == 3) {
-                    m_friction = 0.06;
+                    m_friction = DEFAULT_FRICTION * 0.15;  //0.06;
                 } else {
-                    m_friction = 0.3;
+                    m_friction = DEFAULT_FRICTION;
                 }
                 auto vel_x = getVel().m_x;
                 if (vel_x != 0) {
                     auto tmp = vel_x;
-                    vel_x = vel_x - m_friction * 0.2 * vel_x / std::abs(vel_x);
+                    vel_x = vel_x - m_friction * 0.3 * vel_x / std::abs(vel_x);
                     if (tmp * vel_x < 0) {
                         vel_x = 0;
                     }
@@ -54,7 +54,16 @@ public:
             m_my_func_collision_false_with_object.at(2)
                 = [this](std::shared_ptr<Abstraction>) {
                       setGravity(GRAVITY);
-                      m_friction = 0.3;
+                      m_friction = DEFAULT_FRICTION;
+                      auto vel_x = getVel().m_x;
+                      if (vel_x != 0) {
+                          auto tmp = vel_x;
+                          vel_x = vel_x - m_friction * 0.06 * vel_x / std::abs(vel_x);
+                          if (tmp * vel_x < 0) {
+                              vel_x = 0;
+                          }
+                          setVelX(vel_x);
+                      }
                   };
         }
     }
