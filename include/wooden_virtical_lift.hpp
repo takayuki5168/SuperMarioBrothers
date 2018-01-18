@@ -20,8 +20,8 @@ public:
     }
 
 private:
-    int LIFT_WIDTH = Params::BLOCK_SIZE * 3;
-    int LIFT_HEIGHT = Params::BLOCK_SIZE * 1;
+    static constexpr int LIFT_WIDTH = Params::BLOCK_SIZE * 3;
+    static constexpr int LIFT_HEIGHT = Params::BLOCK_SIZE * 1;
 
     static constexpr int TIME_STEP = 2000;
 };

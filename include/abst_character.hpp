@@ -2,7 +2,6 @@
 
 #include <vector>
 #include "include/abstraction.hpp"
-//#include "include/abst_fix_object.hpp"
 
 class AbstCharacter : public Abstraction
 {
@@ -11,87 +10,57 @@ public:
         : Abstraction(x, y, w, h, color, name)
     {
         m_gravity = GRAVITY;
-        {
+
+        {  // オブジェクトに衝突した時
             // 基本的に壁にあたったら止まる関数
-            m_my_func_collision_true.at(0) = [this](Point object, Point wh, Point) {  // 天井
+            m_my_func_collision_true_with_object.at(0) = [this](std::shared_ptr<Abstraction> abstraction) {  // 天井
                 setVelYPlus();
-                setPosY(object.m_y + wh.m_y);
+                setPosY(abstraction->getPos().m_y + abstraction->getHeight());
             };
-            m_my_func_collision_true.at(0) = [this](Point object, Point, Point) {  // 右壁
+            m_my_func_collision_true_with_object.at(1) = [this](std::shared_ptr<Abstraction> abstraction) {  // 右壁
                 setVelXMinus();
-                setPosX(object.m_x - m_rect.w);
+                setPosX(abstraction->getPos().m_x - getWidth());
             };
-            m_my_func_collision_true.at(0) = [this](Point object, Point, Point) {  // 地面
+            m_my_func_collision_true_with_object.at(2) = [this](std::shared_ptr<Abstraction> abstraction) {  // 地面
                 setGravity(0);
                 setVelYMinus();
-                setPosY(object.m_y - m_rect.h);
+                setPosY(abstraction->getPos().m_y - getHeight());
 
                 // 摩擦
+                if (abstraction->getIdx() == 3) {
+                    m_friction = 0.06;
+                } else {
+                    m_friction = 0.3;
+                }
                 auto vel_x = getVel().m_x;
                 if (vel_x != 0) {
                     auto tmp = vel_x;
-                    vel_x = vel_x - 0.05 * vel_x / std::abs(vel_x);
+                    vel_x = vel_x - m_friction * 0.2 * vel_x / std::abs(vel_x);
                     if (tmp * vel_x < 0) {
                         vel_x = 0;
                     }
                     setVelX(vel_x);
                 }
             };
-            m_my_func_collision_true.at(0) = [this](Point object, Point wh, Point) {  // 左壁
-                setVelXPlus();
-                setPosX(object.m_x + wh.m_x);
-            };
-        };
 
-        // 基本的に重力で落ちる関数
-        m_my_func_collision_false.at(2)
-            = [this](Point, Point, Point) { setGravity(GRAVITY); };
+            m_my_func_collision_true_with_object.at(3) = [this](std::shared_ptr<Abstraction> abstraction) {  // 左壁
+                setVelXPlus();
+                setPosX(abstraction->getPos().m_x + abstraction->getWidth());
+            };
+        }
+
+        {  // オブジェクトに衝突していない時
+            // 基本的に重力で落ちる関数
+            m_my_func_collision_false_with_object.at(2)
+                = [this](std::shared_ptr<Abstraction>) {
+                      setGravity(GRAVITY);
+                      m_friction = 0.3;
+                  };
+        }
     }
 
-    /*
-        {
-            // 基本的に壁にあたったら止まる関数
-            m_collision_true_unique_obj
-                = [this](Point object, Point wh, Point) {  // 天井
-                      setVelYPlus();
-                      setPosY(object.y + wh.y);
-                  };
-            m_collision_true_unique_object_func.at(1)
-                = [this](Point object, Point, Point) {  // 右壁
-                      setVelXMinus();
-                      setPosX(object.x - getWidth());
-                  };
-            m_collision_true_unique_object_func.at(2)
-                = [this](Point object, Point, Point pos_diff) {  // 地面
-                      setGravity(0);
-                      setVelYMinus();
+    virtual void updatePosDecorator(double /*time*/) override {}
 
-                      setPosY(object.y - m_rect.h);
-                      updatePos(pos_diff);
-
-                      // 摩擦
-                      auto vel_x = getVel().x;
-                      if (vel_x != 0) {
-                          auto tmp = vel_x;
-                          vel_x = vel_x - 0.15 * vel_x / std::abs(vel_x);
-                          if (tmp * vel_x < 0) {
-                              vel_x = 0;
-                          }
-                          setVelX(vel_x);
-                      }
-                  };
-            m_collision_true_unique_object_func.at(3)
-                = [this](Point object, Point wh, Point) {  // 左壁
-                      setVelXPlus();
-                      setPosX(object.x + wh.x);
-                  };
-            // 基本的に重力で落ちる関数
-            m_collision_false_unique_object_func.at(2)
-                = [this](Point, Point, Point) { setGravity(GRAVITY); };
-				}
-}
-*/
 protected:
-    double GRAVITY = 0.15;
-    //bool m_unique_object_bottom_flag = false;
+    static constexpr double GRAVITY = 0.15;
 };

@@ -29,6 +29,12 @@ public:
         double m_y = 0;
     };
 
+    enum State {
+        Nothing = 0,
+        Running = 1,
+        Jumping = 2,
+    };
+
     explicit Abstraction(int x, int y, int color, std::string name,
         std::vector<Point> frame_points)
         : m_pos(Point{x, y}), m_name(name), m_color(color)
@@ -45,10 +51,9 @@ public:
                 max_h = frame_points.at(i).m_y;
             }
         }
-        m_w = max_w;
-        m_h = max_h;
-        m_rect = std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(m_w), static_cast<uint16_t>(m_h)});
-
+        m_width = max_w;
+        m_height = max_h;
+        m_rect = std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(m_width), static_cast<uint16_t>(m_height)});
 
         // collision_pointを求める
         for (int i = 0; i < frame_points.size(); i++) {
@@ -76,7 +81,7 @@ public:
 
     explicit Abstraction(int x, int y, int w, int h, int color, std::string name)
         : m_rect(std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(w), static_cast<uint16_t>(h)})), m_pos(Point{x, y}),
-          m_name(name), m_color(color), m_w(w), m_h(h)
+          m_name(name), m_color(color), m_width(w), m_height(h)
     {
         /*
         std::array<Point, 3> top_point = std::array<Point, 3>{
@@ -98,21 +103,21 @@ public:
 	  */
         m_collision.resize(4);
         std::array<Point, 3> top_point = std::array<Point, 3>{
-            Point{w * 1.0 / 4.0, 0},
-            Point{w / 2.0, 0},
-            Point{w * 3.0 / 4.0, 0}};
+            Point{w * 1.0 / 4.0, 0 - 1},
+            Point{w / 2.0, 0 - 1},
+            Point{w * 3.0 / 4.0, 0 - 1}};
         std::array<Point, 3> right_point = std::array<Point, 3>{
-            Point{w, h * 3.0 / 4.0},
-            Point{w, h / 2.0},
-            Point{w, h / 4.0}};
+            Point{w + 1, h * 3.0 / 4.0},
+            Point{w + 1, h / 2.0},
+            Point{w + 1, h / 4.0}};
         std::array<Point, 3> bottom_point = std::array<Point, 3>{
-            Point{w * 3.0 / 4.0, h},
-            Point{w / 2.0, h},
-            Point{w / 4.0, h}};
+            Point{w * 3.0 / 4.0, h + 1},
+            Point{w / 2.0, h + 1},
+            Point{w / 4.0, h + 1}};
         std::array<Point, 3> left_point = std::array<Point, 3>{
-            Point{0, h * 3.0 / 4.0},
-            Point{0, h / 2.0},
-            Point{0, h / 4.0}};
+            Point{0 - 1, h * 3.0 / 4.0},
+            Point{0 - 1, h / 2.0},
+            Point{0 - 1, h / 4.0}};
 
         m_collision_point = std::move(std::vector<std::array<Point, 3>>{
             std::move(top_point),
@@ -122,8 +127,9 @@ public:
     }
 
     std::string getName() { return m_name; }
-    double getWidth() { return m_rect.w; }
-    double getHeight() { return m_rect.h; }
+    double getWidth() { return m_width; }
+    double getHeight() { return m_height; }
+    Point getCenter() { return m_pos + Point{m_width / 2.0, m_height / 2.0}; }
 
     /*!
      * @brief   updatePos(位置の更新関数)内で呼ぶ装飾関数
@@ -171,14 +177,24 @@ public:
             m_collision_point.at(i).at(1) + Point{m_pos.m_x, m_pos.m_y},
             m_collision_point.at(i).at(2) + Point{m_pos.m_x, m_pos.m_y}};
     }
+    std::vector<std::array<Point, 3>> getCollisionPoint()
+    {
+        std::vector<std::array<Point, 3>> tmp_collision_point = m_collision_point;
+        for (int i = 0; i < tmp_collision_point.size(); i++) {
+            for (int j = 0; j < tmp_collision_point.at(i).size(); j++) {
+                tmp_collision_point.at(i).at(j) = tmp_collision_point.at(i).at(j) + m_pos;
+            }
+        }
+        return tmp_collision_point;
+    }
+
 
     virtual void draw(SDL_Surface* m_window, double m_window_x)
     {
-        std::cout << m_pos.m_y << std::endl;
-        m_rect.w = static_cast<int>(m_pos.m_x + m_window_x);
-        m_rect.h = static_cast<int>(m_pos.m_y);
-        m_rect.w = m_w;  // TODO バグ
-        m_rect.h = m_h;  // TODO バグ
+        m_rect.x = static_cast<int>(m_pos.m_x + m_window_x);
+        m_rect.y = static_cast<int>(m_pos.m_y);
+        m_rect.w = m_width;   // TODO バグ m_w, m_hを消す
+        m_rect.h = m_height;  // TODO バグ
         SDL_FillRect(m_window, &m_rect, m_color);
     }
 
@@ -195,9 +211,29 @@ public:
         }
     }
 
-    std::function<void(Point, Point, Point)> getMyFuncCollisionTrue(int i) { return m_my_func_collision_true.at(i); }
-    std::function<void(Point, Point, Point)> getOtherFuncCollisionTrue(int i) { return m_other_func_collision_true.at(i); }
-    std::function<void(Point, Point, Point)> getMyFuncCollisionFalse(int i) { return m_my_func_collision_false.at(i); }
+    std::function<void(std::shared_ptr<Abstraction>)> callMyFuncCollisionTrueWithObject(int i) { return m_my_func_collision_true_with_object.at(i); }
+    std::function<void(std::shared_ptr<Abstraction>)> callOtherFuncCollisionTrueWithObject(int i) { return m_other_func_collision_true_with_object.at(i); }
+    std::function<void(std::shared_ptr<Abstraction>)> callMyFuncCollisionFalseWithObject(int i) { return m_my_func_collision_false_with_object.at(i); }
+
+    std::function<void(std::shared_ptr<Abstraction>)> callOtherFuncCollisionTrueWithCharacter() { return m_other_func_collision_true_with_character; }
+
+    double getLifePoint() const { return m_life_point; }
+    void updateLifePoint(double diff_life_point) { m_life_point += diff_life_point; }
+    bool isAlive() { return m_is_alive; }
+    void setAlive(bool is_alive) { m_is_alive = is_alive; }
+
+    int setIdx(int idx) { m_idx = idx; }
+    int getIdx() const { return m_idx; }
+
+    State getState() const { return m_state; }
+    void setState(State state) { m_state = state; }
+
+    virtual int getJumpCount() const { return m_jump_cnt; }
+    virtual void updateJumpCount(int cnt) { m_jump_cnt += cnt; }
+    virtual void setJumpCount(int cnt) { m_jump_cnt = cnt; }
+
+    void setFriction(double friction) { m_friction = friction; }
+    double getFriction() const { return m_friction; }
 
 protected:
     std::vector<std::array<Point, 3>> m_collision_point;
@@ -209,31 +245,44 @@ protected:
 
     double m_gravity = 0;
 
+    int m_idx = -1;
+
     //!< 4辺が衝突しているかどうか
     std::array<bool, 4> m_collision_fix_object_flag;
     std::array<bool, 4> m_collision_unique_object_flag;
 
     //!< ライフポイント
-    double m_life_point;
+    double m_life_point = 10;
     //!< 生存しているかどうか
-    bool is_alive = true;
+    bool m_is_alive = true;
+
+    //!< 状態
+    State m_state;
+
+    int m_jump_cnt = 0;
 
     // TODO 引数考える
-    std::array<std::function<void(Point object, Point wh, Point vel)>, 4> m_my_func_collision_true
-        = std::array<std::function<void(Point, Point, Point)>, 4>{[](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}};  // !< 衝突した時の自分が受ける処理関数
-    std::array<std::function<void(Point object, Point wh, Point vel)>, 4> m_other_func_collision_true
-        = std::array<std::function<void(Point, Point, Point)>, 4>{[](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}};  // !< 衝突した時の相手が受ける処理関数
-    std::array<std::function<void(Point object, Point wh, Point vel)>, 4> m_my_func_collision_false
-        = std::array<std::function<void(Point, Point, Point)>, 4>{[](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}, [](Point, Point, Point) {}};  // !< 衝突していない時の自分が受ける処理関数
+    std::array<std::function<void(std::shared_ptr<Abstraction>)>, 4> m_my_func_collision_true_with_object
+        = std::array<std::function<void(std::shared_ptr<Abstraction>)>, 4>{[](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}};  // !< 衝突した時の自分が受ける処理関数
+    std::array<std::function<void(std::shared_ptr<Abstraction>)>, 4> m_other_func_collision_true_with_object
+        = std::array<std::function<void(std::shared_ptr<Abstraction>)>, 4>{[](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}};  // !< 衝突した時の相手が受ける処理関数
+    std::array<std::function<void(std::shared_ptr<Abstraction>)>, 4> m_my_func_collision_false_with_object
+        = std::array<std::function<void(std::shared_ptr<Abstraction>)>, 4>{[](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}, [](std::shared_ptr<Abstraction>) {}};  // !< 衝突していない時の自分が受ける処理関数
+
+    std::function<void(std::shared_ptr<Abstraction>)> m_other_func_collision_true_with_character
+        = [](std::shared_ptr<Abstraction>) {};
 
     std::vector<bool> m_collision;
 
     SDL_Rect m_rect;
 
+    //!< Note なぜかm_width, m_heightを付けないとオブジェクトが画面から見きれる
+    double m_width, m_height;
+
+    double m_friction;
+
+
 private:
     int m_color;
     std::string m_name;
-
-    double m_w;
-    double m_h;
 };

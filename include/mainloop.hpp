@@ -27,6 +27,7 @@ public:
     void execute();
     void updatePos();
     void updateCollision();
+    void updateStatus();
     void draw();
 
 private:

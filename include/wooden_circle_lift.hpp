@@ -18,8 +18,9 @@ public:
     }
 
 private:
-    static constexpr int LIFT_WIDTH = 120;
-    static constexpr int LIFT_HEIGHT = 40;
+    // TODO static constexpr にしないとwidthとheightがどんどん大きくなる
+    static constexpr int LIFT_WIDTH = Params::BLOCK_SIZE * 3;
+    static constexpr int LIFT_HEIGHT = Params::BLOCK_SIZE * 1;
 
     static constexpr int TIME_STEP = 2000;
     Point m_center_pos;

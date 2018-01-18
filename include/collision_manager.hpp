@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include "include/params.hpp"
 #include "include/abst_character.hpp"
 #include "include/abst_player.hpp"
 #include "include/abst_enemy.hpp"
@@ -15,14 +16,12 @@ public:
         std::vector<std::shared_ptr<AbstPlayer>> player_vec, std::vector<std::shared_ptr<AbstEnemy>> enemy_vec)
     {
         // TODO 書き方を簡単にする
-        m_character_object.resize(1);
-        for (auto player : player_vec) {
-            m_character_object.at(0).push_back(player);
+        m_character_vec.resize(player_vec.size() + enemy_vec.size());
+        for (int i = 0; i < player_vec.size(); i++) {
+            m_character_vec.at(i) = player_vec.at(i);
         }
-
-        m_character_object.resize(2);
-        for (auto enemy : enemy_vec) {
-            m_character_object.at(1).push_back(enemy);
+        for (int i = 0; i < enemy_vec.size(); i++) {
+            m_character_vec.at(player_vec.size() + i) = enemy_vec.at(i);
         }
     }
 
@@ -30,58 +29,132 @@ public:
         std::vector<std::shared_ptr<AbstRectObject>> rect_object_vec, std::vector<std::shared_ptr<AbstUniqueObject>> unique_object_vec,
         std::vector<std::shared_ptr<AbstItem>> item_vec)
     {
-        for (auto character_object_vec : m_character_object) {  // AbstPlayer, AbstEnemy
-            for (auto character_object : character_object_vec) {
-                character_object->setCollisionAll(false);
-                for (int j = 0; j < 4; j++) {  // !< 四辺
-                    const auto point = character_object->getCollisionPoint(j);
+        updateCollisionWithObject(fix_object_map, rect_object_vec, unique_object_vec, item_vec);
+        updateCollisionWithCharacter();
 
-                    /*
-                    // TODO uniqueと同じように書き換える
-                    for (auto p : point) {// 一辺のうち三点
-                        {                 // Collision With FixObject
-                            int object_x = (p.m_x - static_cast<int>(p.m_x) % Params::BLOCK_SIZE);
-                            int object_y = (p.m_y - static_cast<int>(p.m_y) % Params::BLOCK_SIZE);
-                            int x = MathUtil::setInRange(object_x / Params::BLOCK_SIZE, 100);    //35, 0);  // TODO
-                            int y = MathUtil::setInRange(object_y / Params::BLOCK_SIZE, 11, 0);  // TODO
-                            if (fix_object_map.at(y).at(x) != '0') {                             // TODO
-                                character_object->setCollisionTrue(j);
+        for (int i = 0; i < m_character_vec.size(); i++) {
+            if (not m_character_vec.at(i)->isAlive()) {
+                m_character_vec.erase(m_character_vec.begin() + i);
+            }
+        }
+    }
+
+    void updateCollisionWithObject(std::vector<std::vector<int>>& fix_object_map,
+        std::vector<std::shared_ptr<AbstRectObject>> rect_object_vec, std::vector<std::shared_ptr<AbstUniqueObject>> unique_object_vec,
+        std::vector<std::shared_ptr<AbstItem>> item_vec)
+    {
+        for (auto character : m_character_vec) {  // AbstPlayer, AbstEnemy
+                                                  //for (auto character_object : character_object_vec) {
+            character->setCollisionAll(false);
+            for (int j = 0; j < 4; j++) {  // !< 四辺
+                const auto point = character->getCollisionPoint(j);
+
+                // Collision With FixMap
+                for (auto p : point) {  // 一辺のうち三点
+                    int object_x = (p.m_x - static_cast<int>(p.m_x) % Params::BLOCK_SIZE);
+                    int object_y = (p.m_y - static_cast<int>(p.m_y) % Params::BLOCK_SIZE);
+                    int x = MathUtil::setInRange(object_x / Params::BLOCK_SIZE, 100);    //35, 0);  // TODO
+                    int y = MathUtil::setInRange(object_y / Params::BLOCK_SIZE, 11, 0);  // TODO
+                    bool collision_flag = false;
+                    if (fix_object_map.at(y).at(x) != 0) {  // TODO
+                        collision_flag = true;
+                        character->setCollisionTrue(j);
+                    }
+                    std::shared_ptr<Abstraction> dummy_abst_object = std::make_shared<Abstraction>(
+                        Params::BLOCK_SIZE * x, Params::BLOCK_SIZE * y, Params::BLOCK_SIZE, Params::BLOCK_SIZE, 0, "Dummy");
+                    dummy_abst_object->setIdx(fix_object_map.at(y).at(x));
+
+                    if (not collision_flag) {
+                        character->callMyFuncCollisionFalseWithObject(j)(dummy_abst_object);
+                    } else {  // 衝突している
+                        character->callMyFuncCollisionTrueWithObject(j)(dummy_abst_object);
+                    }
+                }
+
+
+                // Collision With RectObject
+                for (auto abst_object : rect_object_vec) {
+                    auto pos = abst_object->getPos();
+                    auto pos_diff = pos - abst_object->getPrePos();
+                    int w = abst_object->getWidth();
+                    int h = abst_object->getHeight();
+                    bool collision_each_flag = false;
+
+                    const auto point = character->getCollisionPoint(j);
+                    for (auto p : point) {  // 一辺のうち三点
+                        if (j == 2) {       // 下辺だったら一フレーム前に衝突していたら位置の差分を引く
+                            if (p.m_x >= pos.m_x - pos_diff.m_x and p.m_x <= pos.m_x - pos_diff.m_x + w
+                                and p.m_y >= pos.m_y - pos_diff.m_y and p.m_y <= pos.m_y - pos_diff.m_y + h) {
+                                character->setCollisionTrue(j);
+                                collision_each_flag = true;
                             }
-
-                            if (not character_object->getCollisionFixObject(j)) {  // 衝突していない
-                                character_object->getCollisionFalseFixObjectFunc(j)(AbstObject::Point{object_x, object_y}, AbstObject::Point{}, AbstObject::Point{});
-                            } else {  // 衝突している
-                                character_object->getCollisionTrueFixObjectFunc(j)(AbstObject::Point{object_x, object_y}, AbstObject::Point{}, AbstObject::Point{});
+                        } else {  // 下辺以外だったら一フレーム前の位置の差分を引かない
+                            if (p.m_x >= pos.m_x and p.m_x <= pos.m_x + w and p.m_y >= pos.m_y and p.m_y <= pos.m_y + h) {
+                                character->setCollisionTrue(j);
+                                collision_each_flag = true;
                             }
                         }
-						}*/
-                    {                                                   // Collision With UniqueObject
-                        for (auto unique_object : unique_object_vec) {  // 各unique_objectにおいて
-                            auto pos = unique_object->getPos();
-                            auto pos_diff = pos - unique_object->getPrePos();
-                            int w = unique_object->getWidth();
-                            int h = unique_object->getHeight();
-                            bool collision_each_point = false;
+                    }
 
-                            const auto point = character_object->getCollisionPoint(j);
-                            for (auto p : point) {  // 一辺のうち三点
-                                if (j == 2) {       // 下辺だったら一フレーム前に衝突していたら位置の差分を引く
-                                    if (p.m_x >= pos.m_x - pos_diff.m_x and p.m_x <= pos.m_x - pos_diff.m_x + w
-                                        and p.m_y >= pos.m_y - pos_diff.m_y and p.m_y <= pos.m_y - pos_diff.m_y + h) {
-                                        character_object->setCollisionTrue(j);
-                                        collision_each_point = true;
-                                    }
-                                } else {  // 下辺以外だったら一フレーム前の位置の差分を引かない
-                                    if (p.m_x >= pos.m_x and p.m_x <= pos.m_x + w and p.m_y >= pos.m_y and p.m_y <= pos.m_y + h) {
-                                        character_object->setCollisionTrue(j);
-                                        collision_each_point = true;
-                                    }
-                                }
-                            }
+                    if (collision_each_flag) {
+                        abst_object->callOtherFuncCollisionTrueWithObject(j)(character);
+                        character->callMyFuncCollisionTrueWithObject(j)(abst_object);
+                    }
+                }
 
-                            if (collision_each_point) {
-                                character_object->getMyFuncCollisionTrue(j)(pos, AbstObject::Point{w, h}, AbstObject::Point{pos_diff.m_x, 0});
+                // Collision With UniqueObject
+                for (auto abst_object : unique_object_vec) {
+                    auto pos = abst_object->getPos();
+                    auto pos_diff = pos - abst_object->getPrePos();
+                    int w = abst_object->getWidth();
+                    int h = abst_object->getHeight();
+                    bool collision_each_flag = false;
+
+                    const auto point = character->getCollisionPoint(j);
+                    // TODO unique仕様に変える
+                    for (auto p : point) {  // 一辺のうち三点
+                        if (j == 2) {       // 下辺だったら一フレーム前に衝突していたら位置の差分を引く
+                            if (p.m_x >= pos.m_x - pos_diff.m_x and p.m_x <= pos.m_x - pos_diff.m_x + w
+                                and p.m_y >= pos.m_y - pos_diff.m_y and p.m_y <= pos.m_y - pos_diff.m_y + h) {
+                                character->setCollisionTrue(j);
+                                collision_each_flag = true;
                             }
+                        } else {  // 下辺以外だったら一フレーム前の位置の差分を引かない
+                            if (p.m_x >= pos.m_x and p.m_x <= pos.m_x + w and p.m_y >= pos.m_y and p.m_y <= pos.m_y + h) {
+                                character->setCollisionTrue(j);
+                                collision_each_flag = true;
+                            }
+                        }
+                    }
+
+                    if (collision_each_flag) {
+                        abst_object->callOtherFuncCollisionTrueWithObject(j)(character);
+                        character->callMyFuncCollisionTrueWithObject(j)(abst_object);
+                    }
+                }
+            }
+        }
+    }
+
+    void updateCollisionWithCharacter()
+    {
+        for (int i = 0; i < m_character_vec.size(); i++) {
+            for (int j = 0; j < m_character_vec.size(); j++) {
+                if (i > j) {
+                    continue;
+                }
+
+                Abstraction::Point pos = m_character_vec.at(j)->getPos();
+                double width = m_character_vec.at(j)->getWidth();
+                double height = m_character_vec.at(j)->getHeight();
+                // TODO とりあえず矩形で当たり判定
+                for (auto points : m_character_vec.at(i)->getCollisionPoint()) {  // 四辺のうち一辺
+                    for (auto point : points) {                                   // 三点のうち一点
+                        if (point.m_x >= pos.m_x and point.m_x <= pos.m_x + width
+                            and point.m_y >= pos.m_y and point.m_y <= pos.m_y + height) {
+                            m_character_vec.at(i)->callOtherFuncCollisionTrueWithCharacter()(m_character_vec.at(j));
+                            m_character_vec.at(j)->callOtherFuncCollisionTrueWithCharacter()(m_character_vec.at(i));
+                            break;
                         }
                     }
                 }
@@ -89,6 +162,7 @@ public:
         }
     }
 
+
 private:
-    std::vector<std::vector<std::shared_ptr<AbstCharacter>>> m_character_object;
+    std::vector<std::shared_ptr<AbstCharacter>> m_character_vec;
 };

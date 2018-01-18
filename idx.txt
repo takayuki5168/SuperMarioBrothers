@@ -1,0 +1,11 @@
+0 brickblock;  // fix object
+
+50 mashroom;  // item
+
+100 wooden_lift;  // unique object
+
+150 mario;  // character
+151 luigi;
+
+200 kuribo;  // enemy
+210 gabon;

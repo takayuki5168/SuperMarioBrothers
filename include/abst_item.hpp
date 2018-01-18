@@ -11,7 +11,7 @@ public:
     {
         m_gravity = GRAVITY;
         setVelX(1);
-
+        /*
         m_my_func_collision_true.at(0)  // 天井
             = [this](Point object, Point wh, Point) {
                   setVelYPlus();
@@ -36,6 +36,7 @@ public:
 
         m_my_func_collision_false.at(2)
             = [this](Point, Point, Point) { setGravity(GRAVITY); };
+		*/
     }
 
 private:
