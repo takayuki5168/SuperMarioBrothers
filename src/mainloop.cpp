@@ -5,8 +5,9 @@
 #include "include/mario.hpp"
 #include "include/kuribo.hpp"
 #include "include/gabon.hpp"
-#include "include/wooden_virtical_lift.hpp"
 #include "include/wooden_circle_lift.hpp"
+#include "include/wooden_vibrate_lift.hpp"
+#include "include/wooden_virtical_one_way_lift.hpp"
 #include "include/wooden_rotate_rect.hpp"
 #include "include/pipe.hpp"
 
@@ -224,13 +225,22 @@ void MainLoop::initTestWorld()
     {  // RectObjectの初期化
         m_rect_object_vec.clear();
 
-        std::shared_ptr<AbstRectObject> wooden_circle_lift1 = std::make_shared<WoodenCircleLift>(400, 200);
+        std::shared_ptr<AbstRectObject> wooden_circle_lift1 = std::make_shared<WoodenCircleLift>(400, 200, m_time);
         m_rect_object_vec.push_back(std::move(wooden_circle_lift1));
 
-        std::shared_ptr<AbstRectObject> wooden_virtical_lift1 = std::make_shared<WoodenVirticalLift>(80, 240);
-        m_rect_object_vec.push_back(std::move(wooden_virtical_lift1));
+        std::shared_ptr<AbstRectObject> wooden_vibrate_lift1 = std::make_shared<WoodenVibrateLift>(80, 240, m_time);
+        m_rect_object_vec.push_back(std::move(wooden_vibrate_lift1));
 
         std::shared_ptr<AbstRectObject> pipe1 = std::make_shared<Pipe>(160, 360, 280, 360, "../data/back_test_map.txt", "../data/back_ice_map.txt");
+
+        for (int i = 0; i < m_player_vec.size(); i++) {
+            Abstraction::Point pos{0, 0};
+            if (pipe1->getIdx() == 'z') {
+                pos = pipe1->getPos() + Abstraction::Point{0, -m_player_vec.at(i)->getHeight()};
+            }
+            m_player_vec.at(i)->setPos(pos);
+        }
+
         m_rect_object_vec.push_back(std::move(pipe1));
     }
 
@@ -294,14 +304,25 @@ void MainLoop::initIceWorld()
     {  // RectObjectの初期化
         m_rect_object_vec.clear();
 
-        std::shared_ptr<AbstRectObject> wooden_circle_lift1 = std::make_shared<WoodenCircleLift>(400, 200);
-        m_rect_object_vec.push_back(std::move(wooden_circle_lift1));
-
-        std::shared_ptr<AbstRectObject> wooden_virtical_lift1 = std::make_shared<WoodenVirticalLift>(80, 240);
-        m_rect_object_vec.push_back(std::move(wooden_virtical_lift1));
+        std::shared_ptr<AbstRectObject> wooden_virtical_one_way_lift1 = std::make_shared<WoodenVirticalOneWayLift>(1160, 0, true);
+        m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift1));
+        std::shared_ptr<AbstRectObject> wooden_virtical_one_way_lift2 = std::make_shared<WoodenVirticalOneWayLift>(1160, 320, true);
+        m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift2));
+        //std::shared_ptr<AbstRectObject> wooden_virtical_one_way_lift3 = std::make_shared<WoodenVirticalOneWayLift>(1160, 480, true);
+        //m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift3));
+        //std::shared_ptr<AbstRectObject> wooden_virtical_one_way_lift4 = std::make_shared<WoodenVirticalOneWayLift>(1160, 640, true);
+        //m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift4));
 
         std::shared_ptr<AbstRectObject> pipe1 = std::make_shared<Pipe>(160, 360, 280, 360, "../data/back_test_map.txt", "../data/back_ice_map.txt");
         pipe1->setPosByFile(m_back_file_name);
+
+        for (int i = 0; i < m_player_vec.size(); i++) {
+            Abstraction::Point pos{0, 0};
+            if (pipe1->getIdx() == 'z') {
+                pos = pipe1->getPos() + Abstraction::Point{0, -m_player_vec.at(i)->getHeight()};
+            }
+            m_player_vec.at(i)->setPos(pos);
+        }
         m_rect_object_vec.push_back(std::move(pipe1));
     }
 

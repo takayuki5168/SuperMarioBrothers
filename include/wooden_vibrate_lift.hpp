@@ -2,16 +2,15 @@
 
 #include "include/abst_rect_object.hpp"
 
-class WoodenVirticalLift : public AbstRectObject
+class WoodenVibrateLift : public AbstRectObject
 {
 public:
-    WoodenVirticalLift(int x, int y)
-        : AbstRectObject(x, y, LIFT_WIDTH, LIFT_HEIGHT, 0x8d3800, "WoodenVirticalLift") {}
+    WoodenVibrateLift(int x, int y, double time)
+        : AbstRectObject(x, y, LIFT_WIDTH, LIFT_HEIGHT, 0x8d3800, "WoodenVirticalLift"), m_start_time(time) {}
 
     virtual void updatePosDecorator(double time)
     {
-        static int t0 = static_cast<int>(time);
-        int t = static_cast<int>(time) - t0;
+        int t = static_cast<int>(time) - m_start_time;
         int po = (t - t % TIME_STEP) / TIME_STEP;
         if (po % 2 == 0) {
             setVelY(-1);
@@ -21,6 +20,7 @@ public:
     }
 
 private:
+    double m_start_time = 0;
     static constexpr int LIFT_WIDTH = Params::BLOCK_SIZE * 3;
     static constexpr int LIFT_HEIGHT = Params::BLOCK_SIZE * 1;
 
