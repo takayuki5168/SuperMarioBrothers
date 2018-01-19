@@ -2,6 +2,8 @@
 
 #include <vector>
 #include "include/abstraction.hpp"
+#include "include/pipe.hpp"
+#include "include/abst_rect_object.hpp"
 
 class AbstCharacter : public Abstraction
 {
@@ -26,8 +28,9 @@ public:
                 setVelYMinus();
                 setPosY(abstraction->getPos().m_y - getHeight());
 
+                int idx = abstraction->getIdx();
                 // 摩擦
-                if (abstraction->getIdx() == 3) {
+                if (idx == 3) {                            // 氷
                     m_friction = DEFAULT_FRICTION * 0.15;  //0.06;
                 } else {
                     m_friction = DEFAULT_FRICTION;
@@ -70,6 +73,12 @@ public:
 
     virtual void updatePosDecorator(double /*time*/) override {}
 
+    void contactPipeNone() { m_contact_pipe = nullptr; }
+    void contactPipe(std::shared_ptr<AbstRectObject> pipe) { m_contact_pipe = pipe; }
+    std::shared_ptr<AbstRectObject> getContactPipe() { return m_contact_pipe; }
+
 protected:
     static constexpr double GRAVITY = 0.15;
+    bool m_pipe_flag = false;
+    std::shared_ptr<AbstRectObject> m_contact_pipe = nullptr;
 };

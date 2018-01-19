@@ -10,7 +10,8 @@ public:
 
     virtual void updatePosDecorator(double time)
     {
-        int t = static_cast<int>(time);
+        static int t0 = static_cast<int>(time);
+        int t = static_cast<int>(time) - t0;
         int po = (t - t % TIME_STEP) / TIME_STEP;
         if (po % 2 == 0) {
             setVelY(-1);

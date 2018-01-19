@@ -1,8 +1,18 @@
 0 brickblock;  // fix object
 
-50 mashroom;  // item
 
-100 wooden_lift;  // unique object
+49(a);
+
+71(w);  //土管上
+72(x);  //土管右
+73(y);  //土管下
+74(z);  //土管左
+
+
+75 mashroom;  // item
+76 fire flower;
+
+100 wooden_rotate_rect;  // unique object
 
 150 mario;  // character
 151 luigi;

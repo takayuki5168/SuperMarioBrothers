@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <unordered_map>
 #include <memory>
 #include <chrono>
 #include <SDL/SDL.h>
@@ -14,6 +15,7 @@
 #include "include/abst_item.hpp"
 #include "include/abst_rect_object.hpp"
 #include "include/abst_unique_object.hpp"
+#include "include/pipe.hpp"
 
 class MainLoop
 {
@@ -25,10 +27,14 @@ public:
     }
 
     void execute();
+    void updateOther();
     void updatePos();
     void updateCollision();
     void updateStatus();
     void draw();
+
+    void initTestWorld();
+    void initIceWorld();
 
 private:
     MainLoop();
@@ -60,9 +66,13 @@ private:
     //!< マップ
     std::vector<std::vector<int>> m_fix_object_map;
 
+    std::string m_back_file_name;
 
     std::chrono::system_clock::time_point m_start_chrono_time;
     double m_time;
+
+    std::unordered_map<std::string, std::function<void(void)>> m_file_to_init_func;
+    std::string m_next_world = "";
 };
 
 inline MainLoop& mainLoop() { return MainLoop::instance(); }

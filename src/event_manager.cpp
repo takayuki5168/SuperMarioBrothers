@@ -1,7 +1,9 @@
 #include <iostream>
+#include <fstream>
 #include "include/event_manager.hpp"
+#include "include/pipe.hpp"
 
-void EventManager::execute()
+void EventManager::execute(const std::string& back_file_name, std::string& next_world)  //std::vector<std::vector<int>>& fix_object_map)
 {
     int player_idx = 0;
 
@@ -43,10 +45,10 @@ void EventManager::execute()
                        and m_player_vec.at(player_idx)->getJumpCount() > 0) {  // ジャンプ中
                 m_player_vec.at(player_idx)->updateVelY(m_player_vec.at(player_idx)->getVel().m_y * 0.09);
                 m_player_vec.at(player_idx)->updateJumpCount(-1);
-            } else if (m_player_vec.at(player_idx)->getCollision(3) == true and top_key_flag == false) {  // 壁キック
+            } else if (m_player_vec.at(player_idx)->getCollisionFlag(3) == true and top_key_flag == false) {  // 壁キック
                 m_player_vec.at(player_idx)->setVelY(-5.0);
                 m_player_vec.at(player_idx)->updateVelX(2.0, 2.0);
-            } else if (m_player_vec.at(player_idx)->getCollision(1) == true and top_key_flag == false) {  // 壁キック
+            } else if (m_player_vec.at(player_idx)->getCollisionFlag(1) == true and top_key_flag == false) {  // 壁キック
                 m_player_vec.at(player_idx)->setVelY(-5.0);
                 m_player_vec.at(player_idx)->updateVelX(-2.0, 2.0);
             }
@@ -72,6 +74,17 @@ void EventManager::execute()
             }
         }
         if (bottom_key) {
+            std::shared_ptr<AbstRectObject> pipe = m_player_vec.at(player_idx)->getContactPipe();
+            if (pipe != nullptr) {
+                std::array<std::string, 2> file_name_vec = pipe->getFileNameVec();
+
+                for (int i = 0; i < file_name_vec.size(); i++) {
+                    if (file_name_vec.at(i) == back_file_name) {
+                        next_world = file_name_vec.at(1 - i);
+                        break;
+                    }
+                }
+            }
         }
         if (left_key) {
             if (m_player_vec.at(player_idx)->getGravity() == 0) {
