@@ -18,19 +18,18 @@ MainLoop::MainLoop()
 {
     m_window_rect = SDL_Rect{0, 0, static_cast<uint16_t>(Params::WINDOW_WIDTH), static_cast<uint16_t>(Params::WINDOW_HEIGHT)};
 
+    // マップファイルと初期化関数の変換の初期化
     m_file_to_init_func = {{"../data/back_test_map.txt", [this]() { initTestWorld(); }}, {"../data/back_ice_map.txt", [this]() { initIceWorld(); }}};
-
 
     {  // Playerの初期化
         std::shared_ptr<AbstPlayer> mario = std::make_shared<Mario>();
         m_player_vec.push_back(std::move(mario));
     }
+
+    // テスト環境の初期化
     m_back_file_name = "../data/back_test_map.txt";
     std::function<void(void)> func = m_file_to_init_func[m_back_file_name];  //"../data/back_test_map.txt"];
     func();
-
-    //m_file_to_init_func[m_back_file_name];  // テスト環境の初期化
-
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_SetVideoMode(Params::WINDOW_WIDTH, Params::WINDOW_HEIGHT, Params::BPP, SDL_HWSURFACE);
@@ -66,8 +65,7 @@ void MainLoop::execute()
  */
 void MainLoop::updateOther()
 {
-    // Worldの変更フラグが立っていたら
-    if (m_next_world != "") {
+    if (m_next_world != "") {  // Worldの変更フラグが立っていたらWorld変更
         m_back_file_name = m_next_world;
         std::function<void(void)> func = m_file_to_init_func[m_next_world];
         func();
@@ -120,17 +118,21 @@ void MainLoop::updateStatus()
             m_enemy_vec.erase(m_enemy_vec.begin() + i);
         }
     }
-
-    /*
-    for (auto item : m_item_vec) {
-        item->updatePos(m_time);
+    for (int i = 0; i < m_item_vec.size(); i++) {
+        if (not m_item_vec.at(i)->isAlive()) {
+            m_item_vec.erase(m_item_vec.begin() + i);
+        }
     }
-    for (auto rect_object : m_rect_object_vec) {
-        rect_object->updatePos(m_time);
+    for (int i = 0; i < m_rect_object_vec.size(); i++) {
+        if (not m_rect_object_vec.at(i)->isAlive()) {
+            m_rect_object_vec.erase(m_rect_object_vec.begin() + i);
+        }
     }
-    for (auto unique_object : m_unique_object_vec) {
-        unique_object->updatePos(m_time);
-		}*/
+    for (int i = 0; i < m_unique_object_vec.size(); i++) {
+        if (not m_unique_object_vec.at(i)->isAlive()) {
+            m_unique_object_vec.erase(m_unique_object_vec.begin() + i);
+        }
+    }
 }
 
 /*!
@@ -231,7 +233,9 @@ void MainLoop::initTestWorld()
         std::shared_ptr<AbstRectObject> wooden_vibrate_lift1 = std::make_shared<WoodenVibrateLift>(80, 240, m_time);
         m_rect_object_vec.push_back(std::move(wooden_vibrate_lift1));
 
+        // PipeとPlayerの位置の変更
         std::shared_ptr<AbstRectObject> pipe1 = std::make_shared<Pipe>(160, 360, 280, 360, "../data/back_test_map.txt", "../data/back_ice_map.txt");
+        pipe1->setPosByFile(m_back_file_name);
 
         for (int i = 0; i < m_player_vec.size(); i++) {
             Abstraction::Point pos{0, 0};
@@ -308,11 +312,8 @@ void MainLoop::initIceWorld()
         m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift1));
         std::shared_ptr<AbstRectObject> wooden_virtical_one_way_lift2 = std::make_shared<WoodenVirticalOneWayLift>(1160, 320, true);
         m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift2));
-        //std::shared_ptr<AbstRectObject> wooden_virtical_one_way_lift3 = std::make_shared<WoodenVirticalOneWayLift>(1160, 480, true);
-        //m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift3));
-        //std::shared_ptr<AbstRectObject> wooden_virtical_one_way_lift4 = std::make_shared<WoodenVirticalOneWayLift>(1160, 640, true);
-        //m_rect_object_vec.push_back(std::move(wooden_virtical_one_way_lift4));
 
+        // PipeとPlayerの位置の変更
         std::shared_ptr<AbstRectObject> pipe1 = std::make_shared<Pipe>(160, 360, 280, 360, "../data/back_test_map.txt", "../data/back_ice_map.txt");
         pipe1->setPosByFile(m_back_file_name);
 

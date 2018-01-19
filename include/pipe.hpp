@@ -12,7 +12,6 @@ public:
           m_pos_vec({Point{x1, y1}, Point{x2, y2}}), m_file_name_vec({file_name1, file_name2})
     {
         m_idx = 'z';
-        std::cout << m_file_name_vec.at(0) << std::endl;
     }
 
     virtual std::array<std::string, 2> getFileNameVec() const override { return m_file_name_vec; }

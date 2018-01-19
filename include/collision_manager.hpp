@@ -98,7 +98,6 @@ public:
                         }
 
                         // 土管用に別で当たり判定
-
                         if (p.m_x >= pos.m_x and p.m_x <= pos.m_x + w and p.m_y >= pos.m_y and p.m_y <= pos.m_y + h) {
                             if (abst_object->getIdx() == 'z' and j == 2) {
                                 character->contactPipe(abst_object);
@@ -107,7 +106,6 @@ public:
                             }
                         }
                     }
-
 
                     if (collision_each_flag) {
                         abst_object->callOtherFuncCollisionTrueWithObject(j)(character);
