@@ -58,7 +58,6 @@ public:
         }
         m_width = max_w - min_w;
         m_height = max_h - min_h;
-        std::cout << m_width << " " << m_height << std::endl;
         m_rect = std::move(SDL_Rect{static_cast<int16_t>(x), static_cast<int16_t>(y), static_cast<uint16_t>(m_width), static_cast<uint16_t>(m_height)});
 
         // collision_pointを求める
